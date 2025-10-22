@@ -4,7 +4,7 @@ import ru.practicum.ewm.stats.dto.CreateHitDto;
 import ru.practicum.ewm.stats.dto.HitDto;
 import ru.practicum.ewm.stats.service.hit.model.Hit;
 
-public class EndPointHitMapper {
+public class HitMapper {
     public static Hit toHit(CreateHitDto endPointHitCreateDto) {
         return Hit.builder()
                 .app(endPointHitCreateDto.getApp())
@@ -14,13 +14,13 @@ public class EndPointHitMapper {
                 .build();
     }
 
-    public static HitDto toEndPointHitDto(Hit endPointHit) {
+    public static HitDto toEndPointHitDto(Hit hit) {
         return HitDto.builder()
-                .id(endPointHit.getId())
-                .app(endPointHit.getApp())
-                .uri(endPointHit.getUri())
-                .ip(endPointHit.getIp())
-                .timestamp(endPointHit.getTimestamp())
+                .id(hit.getId())
+                .app(hit.getApp())
+                .uri(hit.getUri())
+                .ip(hit.getIp())
+                .timestamp(hit.getTimestamp())
                 .build();
     }
 }

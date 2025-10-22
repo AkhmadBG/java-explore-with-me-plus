@@ -19,6 +19,11 @@ import java.util.List;
 public class HitController {
     private final HitService hitService;
 
+    @PostMapping(path = "/users")
+    public HitDto createUser(@RequestBody @Valid CreateHitDto hitCreateDto) {
+        return hitService.create(hitCreateDto);
+    }
+
     @PostMapping(path = "/hit")
     public HitDto create(@RequestBody @Valid CreateHitDto hitCreateDto) {
         return hitService.create(hitCreateDto);
