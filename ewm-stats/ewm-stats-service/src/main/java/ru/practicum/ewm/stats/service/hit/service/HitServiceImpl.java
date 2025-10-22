@@ -6,25 +6,28 @@ import ru.practicum.ewm.stats.dto.GetStatsDto;
 import ru.practicum.ewm.stats.dto.HitDto;
 import ru.practicum.ewm.stats.dto.CreateHitDto;
 import ru.practicum.ewm.stats.dto.ViewStats;
-import ru.practicum.ewm.stats.service.hit.mapper.EndPointHitMapper;
+import ru.practicum.ewm.stats.service.hit.mapper.HitMapper;
 import ru.practicum.ewm.stats.service.hit.model.Hit;
 import ru.practicum.ewm.stats.service.hit.repository.HitRepository;
-import java.util.Collections;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class HitServiceImpl implements HitService{
+public class HitServiceImpl implements HitService {
     private final HitRepository hitRepository;
 
     @Override
     public HitDto create(CreateHitDto endPointHitCreateDto) {
-        Hit createdHit = hitRepository.save(EndPointHitMapper.toHit(endPointHitCreateDto));
-        return EndPointHitMapper.toEndPointHitDto(createdHit);
+        Hit createdHit = hitRepository.save(HitMapper.toHit(endPointHitCreateDto));
+        return HitMapper.toEndPointHitDto(createdHit);
     }
 
     @Override
-    public List<ViewStats> getStats(GetStatsDto getStatsDto) {
-        return Collections.emptyList();
+    public List<ViewStats> getStats(GetStatsDto dto) {
+        if (dto.getUnique()) {
+            return hitRepository.getViewStats(dto.getStart(), dto.getEnd(), dto.getUris());
+        }
+
+        return hitRepository.getViewStatsNonUnique(dto.getStart(), dto.getEnd(),  dto.getUris());
     }
 }
