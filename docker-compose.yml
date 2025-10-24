@@ -19,6 +19,8 @@ services:
       - POSTGRES_DB=ewm-stats
       - POSTGRES_USER=dbuser
       - POSTGRES_PASSWORD=12345
+    volumes:
+      - db_data:/var/lib/postgresql/data
   ewm-service:
     build: ./ewm-main
     image: ewm-main-image
@@ -40,7 +42,6 @@ services:
       - POSTGRES_DB=ewm-main
       - POSTGRES_USER=dbuser
       - POSTGRES_PASSWORD=12345
-    volumes:
-      - db_data:/var/lib/postgresql/data
+
 volumes:
   db_data:
