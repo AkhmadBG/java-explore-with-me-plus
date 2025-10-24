@@ -11,12 +11,12 @@ import java.util.List;
 @Builder
 public class GetStatsDto {
     @NotNull
-    LocalDateTime start;
+    private LocalDateTime start;
 
     @NotNull
-    LocalDateTime end;
+    private LocalDateTime end;
 
-    List<String> uris;
+    private List<String> uris;
 
-    Boolean unique;
+    private Boolean unique;
 }
