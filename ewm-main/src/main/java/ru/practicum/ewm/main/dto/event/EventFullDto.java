@@ -1,16 +1,14 @@
 package ru.practicum.ewm.main.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 import ru.practicum.ewm.main.dto.user.UserShortDto;
 import ru.practicum.ewm.main.entity.Location;
 
 import static ru.practicum.ewm.main.util.DateFormatter.PATTERN;
 
+@Builder
 @Getter
 @Setter
 @NoArgsConstructor

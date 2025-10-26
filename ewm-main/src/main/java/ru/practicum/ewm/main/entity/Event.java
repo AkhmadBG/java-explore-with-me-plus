@@ -1,19 +1,18 @@
 package ru.practicum.ewm.main.entity;
 
 import jakarta.persistence.*;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import ru.practicum.ewm.main.enums.EventState;
 
 import java.time.LocalDateTime;
 
+@Builder
 @Getter
 @Setter
 @Entity
 @Table(name = "events")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 public class Event {
 
     @Id
