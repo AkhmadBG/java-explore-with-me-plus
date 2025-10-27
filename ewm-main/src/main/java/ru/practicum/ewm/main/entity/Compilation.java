@@ -1,12 +1,10 @@
-package ru.practicum.ewm.main.compilation.model;
+package ru.practicum.ewm.main.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import jakarta.validation.groups.Default;
 import lombok.*;
-import ru.practicum.ewm.main.event.entity.Event;
 
 import java.util.ArrayList;
 import java.util.List;

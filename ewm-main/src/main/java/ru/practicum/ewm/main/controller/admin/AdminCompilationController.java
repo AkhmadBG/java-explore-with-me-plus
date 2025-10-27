@@ -1,11 +1,11 @@
-package ru.practicum.ewm.main.compilation.controller;
+package ru.practicum.ewm.main.controller.admin;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.main.compilation.dto.CompilationDto;
-import ru.practicum.ewm.main.compilation.dto.NewCompilationDto;
-import ru.practicum.ewm.main.compilation.dto.UpdateCompilationRequest;
-import ru.practicum.ewm.main.compilation.service.CompilationService;
+import ru.practicum.ewm.main.dto.compilation.CompilationDto;
+import ru.practicum.ewm.main.dto.compilation.NewCompilationDto;
+import ru.practicum.ewm.main.dto.compilation.UpdateCompilationRequest;
+import ru.practicum.ewm.main.service.compilation.CompilationService;
 
 @RestController
 @RequiredArgsConstructor
@@ -13,11 +13,6 @@ import ru.practicum.ewm.main.compilation.service.CompilationService;
 public class AdminCompilationController {
 
     private final CompilationService compilationService;
-
-//    Admin: Подборки событий API для работы с подборками событий
-//    POST /admin/compilations Добавление новой подборки (подборка может не содержать событий)
-//    DELETE /admin/compilations/{compId} Удаление подборки
-//    PATCH /admin/compilations/{compId} Обновить информацию о подборке
 
     @PostMapping
     public CompilationDto createCompilation(@RequestBody NewCompilationDto newCompilationDto) {
