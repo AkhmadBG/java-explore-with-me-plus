@@ -1,13 +1,12 @@
 package ru.practicum.ewm.main.controller.pub;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.service.compilation.CompilationService;
 
+import java.awt.print.Pageable;
 import java.util.List;
 
 @RestController
@@ -18,8 +17,9 @@ public class PublicCompilationController {
     private final CompilationService compilationService;
 
     @GetMapping
-    public List<CompilationDto> getCompilations() {
-        List<CompilationDto> compilationsDto = compilationService.getCompilations();
+    public Page<CompilationDto> getCompilations(@RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size) {
+        Page<CompilationDto> compilationsDto = compilationService.getCompilations(page, size);
         return compilationsDto;
     }
 

@@ -1,14 +1,13 @@
 package ru.practicum.ewm.main.service.compilation;
 
+import org.springframework.data.domain.Page;
 import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.main.dto.compilation.UpdateCompilationRequest;
 
-import java.util.List;
-
 public interface CompilationService {
 
-    List<CompilationDto> getCompilations();
+    Page<CompilationDto> getCompilations(int page, int size);
 
     CompilationDto getCompilationById(Long compId);
 
@@ -16,6 +15,6 @@ public interface CompilationService {
 
     void deleteCompilationById(Long compId);
 
-    CompilationDto updateCompilationById(UpdateCompilationRequest updateCompilationRequest);
+    CompilationDto updateCompilationById(Long compId, UpdateCompilationRequest updateCompilationRequest);
 
 }

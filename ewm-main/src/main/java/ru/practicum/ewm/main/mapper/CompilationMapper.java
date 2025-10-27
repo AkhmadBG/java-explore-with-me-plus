@@ -1,5 +1,6 @@
 package ru.practicum.ewm.main.mapper;
 
+import org.springframework.stereotype.Component;
 import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.main.dto.compilation.UpdateCompilationRequest;
@@ -8,9 +9,10 @@ import ru.practicum.ewm.main.entity.Event;
 
 import java.util.List;
 
+@Component
 public class CompilationMapper {
 
-    public static CompilationDto toCompilationDto(Compilation compilation) {
+    public CompilationDto toCompilationDto(Compilation compilation) {
         return CompilationDto.builder()
                 .id(compilation.getId())
                 .title(compilation.getTitle())
@@ -19,7 +21,7 @@ public class CompilationMapper {
                 .build();
     }
 
-    public static Compilation toCompilation(NewCompilationDto newCompilationDto,
+    public Compilation toCompilation(NewCompilationDto newCompilationDto,
                                             List<Event> events) {
         return Compilation.builder()
                 .title(newCompilationDto.getTitle())
@@ -28,7 +30,7 @@ public class CompilationMapper {
                 .build();
     }
 
-    public static Compilation updateCompilation(Compilation compilation,
+    public static void updateCompilation(Compilation compilation,
                                                 UpdateCompilationRequest updateCompilationRequest,
                                                 List<Event> events) {
         if (updateCompilationRequest.hasTitle()) {
@@ -40,7 +42,6 @@ public class CompilationMapper {
         if (updateCompilationRequest.hasEvents()) {
             compilation.setEvents(events);
         }
-        return compilation;
     }
 
 }

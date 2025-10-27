@@ -26,7 +26,7 @@ public class UpdateCompilationRequest {
     }
 
     public boolean hasEvents() {
-        return this.events != null;
+        return this.events != null && !this.events.isEmpty();
     }
 
 }
