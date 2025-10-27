@@ -1,19 +1,19 @@
-package ru.practicum.ewm.main.compilations.controller;
+package ru.practicum.ewm.main.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.practicum.ewm.main.compilations.dto.CompilationDto;
-import ru.practicum.ewm.main.compilations.service.CompilationService;
+import ru.practicum.ewm.main.compilation.dto.CompilationDto;
+import ru.practicum.ewm.main.compilation.service.CompilationService;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/compilations")
-public class CompilationController {
+public class PublicCompilationController {
 
     private final CompilationService compilationService;
 

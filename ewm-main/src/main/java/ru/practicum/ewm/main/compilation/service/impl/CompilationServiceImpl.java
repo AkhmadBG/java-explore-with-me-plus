@@ -1,15 +1,20 @@
-package ru.practicum.ewm.main.compilations.service.impl;
+package ru.practicum.ewm.main.compilation.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.practicum.ewm.main.compilations.dto.CompilationDto;
-import ru.practicum.ewm.main.compilations.dto.NewCompilationDto;
-import ru.practicum.ewm.main.compilations.dto.UpdateCompilationRequest;
-import ru.practicum.ewm.main.compilations.service.CompilationService;
+import ru.practicum.ewm.main.compilation.dto.CompilationDto;
+import ru.practicum.ewm.main.compilation.dto.NewCompilationDto;
+import ru.practicum.ewm.main.compilation.dto.UpdateCompilationRequest;
+import ru.practicum.ewm.main.compilation.repository.CompilationRepository;
+import ru.practicum.ewm.main.compilation.service.CompilationService;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
+
+    private final CompilationRepository compilationRepository;
 
     @Override
     public List<CompilationDto> getCompilations() {

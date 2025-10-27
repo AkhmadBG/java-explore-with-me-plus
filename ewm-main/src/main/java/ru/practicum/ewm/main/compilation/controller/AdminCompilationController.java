@@ -1,16 +1,16 @@
-package ru.practicum.ewm.main.compilations.controller;
+package ru.practicum.ewm.main.compilation.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.main.compilations.dto.CompilationDto;
-import ru.practicum.ewm.main.compilations.dto.NewCompilationDto;
-import ru.practicum.ewm.main.compilations.dto.UpdateCompilationRequest;
-import ru.practicum.ewm.main.compilations.service.CompilationService;
+import ru.practicum.ewm.main.compilation.dto.CompilationDto;
+import ru.practicum.ewm.main.compilation.dto.NewCompilationDto;
+import ru.practicum.ewm.main.compilation.dto.UpdateCompilationRequest;
+import ru.practicum.ewm.main.compilation.service.CompilationService;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/admin/compilations")
-public class CompilationAdminController {
+public class AdminCompilationController {
 
     private final CompilationService compilationService;
 
