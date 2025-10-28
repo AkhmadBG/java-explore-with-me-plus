@@ -69,7 +69,7 @@ public class EventServiceImpl implements EventService {
     // GET /users/{userId}/events
     @Override
     public Page<EventShortDto> getEvents(Long userId, Pageable pageable) {
-        if (!userRepository.existById(userId)) {
+        if (!userRepository.existsById(userId)) {
             throw new UserNotExistException("User with id=" + userId + " was not found");
         }
 
@@ -103,7 +103,7 @@ public class EventServiceImpl implements EventService {
                     event.setState(EventState.PENDING);
                     break;
                 case CANCEL_REVIEW:
-                    event.setState(EventState.CANCELLED);
+                    event.setState(EventState.CANCELED);
                     break;
             }
         }
@@ -123,6 +123,7 @@ public class EventServiceImpl implements EventService {
 
     // PATCH /admin/events/{eventId}
     @Override
+    @Transactional
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminDto updateEventAdminDto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
@@ -139,7 +140,7 @@ public class EventServiceImpl implements EventService {
                     if (event.getPublishedOn() != null) {
                         throw new AlreadyPublishedException("Event already published");
                     }
-                    if (event.getState().equals(EventState.CANCELLED)) {
+                    if (event.getState().equals(EventState.CANCELED)) {
                         throw new EventAlreadyCanceledException("Event already canceled");
                     }
                     if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
@@ -153,7 +154,7 @@ public class EventServiceImpl implements EventService {
                     if (event.getPublishedOn() != null) {
                         throw new AlreadyPublishedException("Event already published");
                     }
-                    event.setState(EventState.CANCELLED);
+                    event.setState(EventState.CANCELED);
                     break;
             }
         }
