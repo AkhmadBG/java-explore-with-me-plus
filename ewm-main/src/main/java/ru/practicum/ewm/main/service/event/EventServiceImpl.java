@@ -119,7 +119,41 @@ public class EventServiceImpl implements EventService {
     // PATCH /admin/events/{eventId}
     @Override
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminDto updateEventAdminDto) {
-        return null;
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
+
+        if (updateEventAdminDto == null) {
+            return EventMapper.toEventFullDto(event);
+        }
+
+        updateEventFieldsFromAdminDTO(event, updateEventAdminDto);
+
+        if (updateEventAdminDto.getStateAction() != null) {
+            switch (updateEventAdminDto.getStateAction()) {
+                case PUBLISH_EVENT:
+                    if (event.getPublishedOn() != null) {
+                        throw new AlreadyPublishedException("Event already published");
+                    }
+                    if (event.getState().equals(EventState.CANCELLED)) {
+                        throw new EventAlreadyCanceledException("Event already canceled");
+                    }
+                    if (event.getEventDate().isBefore(LocalDateTime.now().plusHours(1))) {
+                        throw new WrongTimeException("Event date must be at least 1 hour from publication date");
+                    }
+                    event.setState(EventState.PUBLISHED);
+                    event.setPublishedOn(LocalDateTime.now());
+                    break;
+
+                case REJECT_EVENT:
+                    if (event.getPublishedOn() != null) {
+                        throw new AlreadyPublishedException("Event already published");
+                    }
+                    event.setState(EventState.CANCELLED);
+                    break;
+            }
+        }
+        Event updatedEvent = eventRepository.save(event);
+        return EventMapper.toEventFullDto(updatedEvent);
     }
 
     // GET /events/{id}
@@ -135,13 +169,19 @@ public class EventServiceImpl implements EventService {
 
     // GET /admin/events
     @Override
-    public List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, EventState states, List<Long> categoriesId, String rangeStart, String rangeEnd, Integer from, Integer size) {
+    public List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, EventState states,
+                                                         List<Long> categoriesId, String rangeStart,
+                                                         String rangeEnd, Integer from, Integer size) {
         return List.of();
     }
 
     // GET /events
     @Override
-    public List<EventFullDto> getEventsWithParamsByUser(String text, List<Long> categories, Boolean paid, String rangeStart, String rangeEnd, Boolean onlyAvailable, SortValue sort, Integer from, Integer size, HttpServletRequest request) {
+    public List<EventFullDto> getEventsWithParamsByUser(String text, List<Long> categories,
+                                                        Boolean paid, String rangeStart,
+                                                        String rangeEnd, Boolean onlyAvailable,
+                                                        SortValue sort, Integer from,
+                                                        Integer size, HttpServletRequest request) {
         return List.of();
     }
 
@@ -149,18 +189,15 @@ public class EventServiceImpl implements EventService {
         if (dto.getAnnotation() != null) {
             event.setAnnotation(dto.getAnnotation());
         }
-
         if (dto.getCategory() != null) {
-            Category category = categoryRepository.findById(newEventDto.getCategory())
-                    .orElseThrow(() -> new CategoryNotExistException("Category with id=" + newEventDto.getCategory() +
+            Category category = categoryRepository.findById(dto.getCategory())
+                    .orElseThrow(() -> new CategoryNotExistException("Category with id=" + dto.getCategory() +
                             " was not found"));
             event.setCategory(category);
         }
-
         if (dto.getDescription() != null) {
             event.setDescription(dto.getDescription());
         }
-
         if (dto.getEventDate() != null) {
             LocalDateTime newEventDate = parse(dto.getEventDate());
             if (newEventDate.isBefore(LocalDateTime.now().plusHours(2))) {
@@ -168,26 +205,65 @@ public class EventServiceImpl implements EventService {
             }
             event.setEventDate(newEventDate);
         }
-
         if (dto.getLocation() != null) {
             Location location = new Location();
             location.setLat(dto.getLocation().getLat());
             location.setLon(dto.getLocation().getLon());
             event.setLocation(location);
         }
-
         if (dto.getPaid() != null) {
             event.setPaid(dto.getPaid());
         }
-
         if (dto.getParticipantLimit() != null) {
             event.setParticipantLimit(dto.getParticipantLimit());
         }
-
         if (dto.getRequestModeration() != null) {
             event.setRequestModeration(dto.getRequestModeration());
         }
+        if (dto.getTitle() != null) {
+            event.setTitle(dto.getTitle());
+        }
+    }
 
+    private void updateEventFieldsFromAdminDTO(Event event, UpdateEventAdminDto dto) {
+        if (dto.getAnnotation() != null) {
+            event.setAnnotation(dto.getAnnotation());
+        }
+
+        if (dto.getCategory() != null) {
+            Category category = categoryRepository.findById(dto.getCategory())
+                    .orElseThrow(() -> new CategoryNotExistException("Category with id=" + dto.getCategory() +
+                            " was not found"));
+            event.setCategory(category);
+        }
+        if (dto.getDescription() != null) {
+            event.setDescription(dto.getDescription());
+        }
+        if (dto.getEventDate() != null) {
+            LocalDateTime newEventDate = parse(dto.getEventDate());
+            if (event.getPublishedOn() != null && newEventDate.isBefore(event.getPublishedOn().plusHours(1))) {
+                throw new WrongTimeException("Event date must be at least 1 hour after publication" + newEventDate);
+            }
+            if (newEventDate.isBefore(LocalDateTime.now())) {
+                throw new WrongTimeException("Event date cannot be in the past");
+            }
+            event.setEventDate(newEventDate);
+        }
+        if (dto.getLocation() != null) {
+            Location location = new Location();
+            location.setLat(dto.getLocation().getLat());
+            location.setLon(dto.getLocation().getLon());
+            event.setLocation(location);
+        }
+        if (dto.getPaid() != null) {
+            event.setPaid(dto.getPaid());
+        }
+        if (dto.getParticipantLimit() != null) {
+            event.setParticipantLimit(dto.getParticipantLimit());
+        }
+        if (dto.getRequestModeration() != null) {
+            event.setRequestModeration(dto.getRequestModeration());
+        }
         if (dto.getTitle() != null) {
             event.setTitle(dto.getTitle());
         }
