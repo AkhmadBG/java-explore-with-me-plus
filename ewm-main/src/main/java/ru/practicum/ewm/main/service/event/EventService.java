@@ -4,7 +4,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import ru.practicum.ewm.main.dto.event.*;
-import ru.practicum.ewm.main.entity.Event;
 
 import java.util.List;
 
@@ -21,8 +20,6 @@ public interface EventService {
     EventFullDto updateEvent(Long eventId, UpdateEventAdminDto updateEventAdminDto);
 
     EventFullDto getEvent(Long id, HttpServletRequest request);
-
-    void setView(List<Event> events);
 
     List<EventFullDto> getEventsWithParamsByAdmin(AdminEventSearchRequest request);
 

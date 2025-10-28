@@ -15,4 +15,6 @@ public interface StatisticsService {
     void sendStat(List<Event> events, HttpServletRequest request);
 
     void setView(Event event);
+
+    void setView(List<Event> event);
 }

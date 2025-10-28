@@ -17,21 +17,18 @@ import ru.practicum.ewm.main.entity.Event;
 import ru.practicum.ewm.main.entity.Location;
 import ru.practicum.ewm.main.entity.User;
 import ru.practicum.ewm.main.enums.EventState;
+import ru.practicum.ewm.main.enums.SortValue;
 import ru.practicum.ewm.main.exception.*;
 import ru.practicum.ewm.main.mapper.EventMapper;
 import ru.practicum.ewm.main.repository.CategoryRepository;
 import ru.practicum.ewm.main.repository.EventRepository;
 import ru.practicum.ewm.main.repository.UserRepository;
 import ru.practicum.ewm.main.service.statistics.StatisticsService;
-import ru.practicum.ewm.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm.main.util.DateFormatter.format;
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
 import static ru.practicum.ewm.main.util.SearchValidators.*;
 
@@ -81,7 +78,7 @@ public class EventServiceImpl implements EventService {
 
         Page<Event> eventsPage = eventRepository.findAllByInitiator(userId, pageable);
         if (eventsPage.hasContent()) {
-            setView(eventsPage.getContent());
+            statisticsService.setView(eventsPage.getContent());
         }
         return eventsPage.map(EventMapper::toEventShortDto);
     }
@@ -123,7 +120,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
 
-        setView(List.of(event));
+        statisticsService.setView(List.of(event));
         return EventMapper.toEventFullDto(event);
     }
 
@@ -175,33 +172,9 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
 
         statisticsService.sendStat(event, request);
-        setView(List.of(event));
+        statisticsService.setView(List.of(event));
 
         return EventMapper.toEventFullDto(event);
-    }
-
-    @Override
-    public void setView(List<Event> events) {
-        if (events == null || events.isEmpty()) return;
-
-        LocalDateTime start = events.stream()
-                .map(Event::getCreatedOn)
-                .min(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now().minusYears(1));
-
-        List<String> uris = events.stream()
-                .map(event -> "/events/" + event.getId())
-                .collect(Collectors.toList());
-
-        List<ViewStats> stats = statisticsService.getStats(format(start), format(LocalDateTime.now()), uris);
-
-        Map<String, Long> viewsMap = stats.stream()
-                .collect(Collectors.toMap(ViewStats::getUri, ViewStats::getHits));
-
-        for (Event event : events) {
-            String uri = "/events/" + event.getId();
-            event.setViews(viewsMap.getOrDefault(uri, 0L));
-        }
     }
 
     // GET /admin/events
@@ -228,7 +201,7 @@ public class EventServiceImpl implements EventService {
             return new ArrayList<>();
         }
 
-        setView(events);
+        statisticsService.setView(events);
         return events.stream()
                 .map(EventMapper::toEventFullDto)
                 .collect(Collectors.toList());
@@ -238,7 +211,33 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEventsWithParamsByUser(PublicEventSearchRequest request,
                                                         HttpServletRequest httpRequest) {
-        return List.of();
+        LocalDateTime start = request.getRangeStart() != null ? parse(request.getRangeStart()) : null;
+        LocalDateTime end = request.getRangeEnd() != null ? parse(request.getRangeEnd()) : null;
+
+        List<Event> events = findPublicEvents(request, start, end);
+        if (isOnlyAvailable(request.getOnlyAvailable())) {
+            events = events.stream()
+                    .filter(event -> event.getParticipantLimit() == 0 ||
+                            event.getConfirmedRequests() < event.getParticipantLimit())
+                    .collect(Collectors.toList());
+        }
+        if (shouldSort(request.getSort())) {
+            Comparator<Event> comparator = request.getSort() == SortValue.VIEWS ?
+                    Comparator.comparing(Event::getViews, Comparator.nullsLast(Long::compareTo)).reversed() :
+                    Comparator.comparing(Event::getEventDate, Comparator.nullsLast(LocalDateTime::compareTo));
+            events = events.stream()
+                    .sorted(comparator)
+                    .collect(Collectors.toList());
+        }
+        if (events.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        statisticsService.setView(events);
+        statisticsService.sendStat(events, httpRequest);
+        return events.stream()
+                .map(EventMapper::toEventFullDto)
+                .collect(Collectors.toList());
     }
 
     private void updateEventFieldsFromUserDto(Event event, UpdateEventUserDto dto) {
@@ -351,5 +350,57 @@ public class EventServiceImpl implements EventService {
             predicates.add(endDateFilter);
         }
         return predicates;
+    }
+
+    private List<Predicate> buildPublicPredicates(CriteriaBuilder builder, Root<Event> root,
+                                                  PublicEventSearchRequest request,
+                                                  LocalDateTime start, LocalDateTime end) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(builder.equal(root.get("state"), EventState.PUBLISHED));
+
+        if (hasText(request.getText())) {
+            String searchText = "%" + request.getText().toLowerCase() + "%";
+            Predicate annotationMatch = builder.like(builder.lower(root.get("annotation")), searchText);
+            Predicate descriptionMatch = builder.like(builder.lower(root.get("description")), searchText);
+
+            Predicate textSearch = builder.or(annotationMatch, descriptionMatch);
+            predicates.add(textSearch);
+        }
+        if (hasCategories(request.getCategories())) {
+            Predicate categoryFilter = root.get("category").get("id").in(request.getCategories());
+            predicates.add(categoryFilter);
+        }
+        if (request.getPaid() != null) {
+            Predicate paidFilter = request.getPaid() ?
+                    builder.isTrue(root.get("paid")) :
+                    builder.isFalse(root.get("paid"));
+            predicates.add(paidFilter);
+        }
+        if (start != null) {
+            Predicate startDateFilter = builder.greaterThanOrEqualTo(root.get("eventDate"), start);
+            predicates.add(startDateFilter);
+        }
+        if (end != null) {
+            Predicate endDateFilter = builder.lessThanOrEqualTo(root.get("eventDate"), end);
+            predicates.add(endDateFilter);
+        }
+        return predicates;
+    }
+
+    private List<Event> findPublicEvents(PublicEventSearchRequest request, LocalDateTime start, LocalDateTime end) {
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Event> query = builder.createQuery(Event.class);
+        Root<Event> root = query.from(Event.class);
+
+        List<Predicate> predicates = buildPublicPredicates(builder, root, request, start, end);
+
+        query.where(predicates.toArray(new Predicate[0]));
+        query.orderBy(builder.asc(root.get("eventDate")));
+
+        return entityManager.createQuery(query)
+                .setFirstResult(request.getFrom())
+                .setMaxResults(request.getSize())
+                .getResultList();
     }
 }
