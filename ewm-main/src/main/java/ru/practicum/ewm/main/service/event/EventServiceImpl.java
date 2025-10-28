@@ -18,9 +18,13 @@ import ru.practicum.ewm.main.mapper.EventMapper;
 import ru.practicum.ewm.main.repository.CategoryRepository;
 import ru.practicum.ewm.main.repository.EventRepository;
 import ru.practicum.ewm.main.repository.UserRepository;
+import ru.practicum.ewm.main.service.statistics.StatisticsService;
+import ru.practicum.ewm.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.main.util.DateFormatter.format;
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
@@ -34,6 +38,7 @@ public class EventServiceImpl implements EventService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper eventMapper;
+    private final StatisticsService statisticsService;
 
     // POST /users/{userId}/events
     @Override
@@ -164,7 +169,26 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public void setView(List<Event> events) {
+        if (events == null || events.isEmpty()) return;
 
+        LocalDateTime start = events.stream()
+                .map(Event::getCreatedOn)
+                .min(LocalDateTime::compareTo)
+                .orElse(LocalDateTime.now().minusYears(1));
+
+        List<String> uris = events.stream()
+                .map(event -> "/events/" + event.getId())
+                .collect(Collectors.toList());
+
+        List<ViewStats> stats = statisticsService.getStats(format(start), format(LocalDateTime.now()), uris);
+
+        Map<String, Long> viewsMap = stats.stream()
+                .collect(Collectors.toMap(ViewStats::getUri, ViewStats::getHits));
+
+        for (Event event : events) {
+            String uri = "/events/" + event.getId();
+            event.setViews(viewsMap.getOrDefault(uri, 0L));
+        }
     }
 
     // GET /admin/events
