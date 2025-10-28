@@ -163,8 +163,14 @@ public class EventServiceImpl implements EventService {
 
     // GET /events/{id}
     @Override
-    public EventFullDto getEvent(Long id, HttpServletRequest request) {
-        return null;
+    public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
+        Event event = eventRepository.findByIdAndPublishedOnIsNotNull(eventId)
+                .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
+
+        statisticsService.sendStat(event, request);
+        setView(List.of(event));
+
+        return EventMapper.toEventFullDto(event);
     }
 
     @Override
