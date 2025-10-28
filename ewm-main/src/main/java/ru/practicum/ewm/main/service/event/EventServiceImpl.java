@@ -1,5 +1,10 @@
 package ru.practicum.ewm.main.service.event;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,7 +17,6 @@ import ru.practicum.ewm.main.entity.Event;
 import ru.practicum.ewm.main.entity.Location;
 import ru.practicum.ewm.main.entity.User;
 import ru.practicum.ewm.main.enums.EventState;
-import ru.practicum.ewm.main.enums.SortValue;
 import ru.practicum.ewm.main.exception.*;
 import ru.practicum.ewm.main.mapper.EventMapper;
 import ru.practicum.ewm.main.repository.CategoryRepository;
@@ -22,12 +26,14 @@ import ru.practicum.ewm.main.service.statistics.StatisticsService;
 import ru.practicum.ewm.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.main.util.DateFormatter.format;
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
+import static ru.practicum.ewm.main.util.SearchValidators.*;
 
 @Service
 @RequiredArgsConstructor
@@ -37,8 +43,8 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final EventMapper eventMapper;
     private final StatisticsService statisticsService;
+    private final EntityManager entityManager;
 
     // POST /users/{userId}/events
     @Override
@@ -200,19 +206,38 @@ public class EventServiceImpl implements EventService {
 
     // GET /admin/events
     @Override
-    public List<EventFullDto> getEventsWithParamsByAdmin(List<Long> users, EventState states,
-                                                         List<Long> categoriesId, String rangeStart,
-                                                         String rangeEnd, Integer from, Integer size) {
-        return List.of();
+    public List<EventFullDto> getEventsWithParamsByAdmin(AdminEventSearchRequest request) {
+        LocalDateTime start = request.getRangeStart() != null ? parse(request.getRangeStart()) : null;
+        LocalDateTime end = request.getRangeEnd() != null ? parse(request.getRangeEnd()) : null;
+
+        CriteriaBuilder builder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Event> query = builder.createQuery(Event.class);
+        Root<Event> root = query.from(Event.class);
+
+        List<Predicate> predicates = buildAdminPredicates(builder, root, request, start, end);
+
+        query.where(predicates.toArray(new Predicate[0]));
+        query.orderBy(builder.desc(root.get("createdOn")));
+
+        List<Event> events = entityManager.createQuery(query)
+                .setFirstResult(request.getFrom())
+                .setMaxResults(request.getSize())
+                .getResultList();
+
+        if (events.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        setView(events);
+        return events.stream()
+                .map(EventMapper::toEventFullDto)
+                .collect(Collectors.toList());
     }
 
     // GET /events
     @Override
-    public List<EventFullDto> getEventsWithParamsByUser(String text, List<Long> categories,
-                                                        Boolean paid, String rangeStart,
-                                                        String rangeEnd, Boolean onlyAvailable,
-                                                        SortValue sort, Integer from,
-                                                        Integer size, HttpServletRequest request) {
+    public List<EventFullDto> getEventsWithParamsByUser(PublicEventSearchRequest request,
+                                                        HttpServletRequest httpRequest) {
         return List.of();
     }
 
@@ -298,5 +323,33 @@ public class EventServiceImpl implements EventService {
         if (dto.getTitle() != null) {
             event.setTitle(dto.getTitle());
         }
+    }
+
+    private List<Predicate> buildAdminPredicates(CriteriaBuilder builder, Root<Event> root,
+                                                 AdminEventSearchRequest request,
+                                                 LocalDateTime start, LocalDateTime end) {
+        List<Predicate> predicates = new ArrayList<>();
+
+        if (hasCategories(request.getCategories())) {
+            Predicate categoryFilter = root.get("category").get("id").in(request.getCategories());
+            predicates.add(categoryFilter);
+        }
+        if (hasUsers(request.getUsers())) {
+            Predicate userFilter = root.get("initiator").get("id").in(request.getUsers());
+            predicates.add(userFilter);
+        }
+        if (hasStates(request.getStates())) {
+            Predicate stateFilter = root.get("state").in(request.getStates());
+            predicates.add(stateFilter);
+        }
+        if (start != null) {
+            Predicate startDateFilter = builder.greaterThanOrEqualTo(root.get("eventDate"), start);
+            predicates.add(startDateFilter);
+        }
+        if (end != null) {
+            Predicate endDateFilter = builder.lessThanOrEqualTo(root.get("eventDate"), end);
+            predicates.add(endDateFilter);
+        }
+        return predicates;
     }
 }

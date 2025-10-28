@@ -12,12 +12,12 @@ public class SearchValidators {
         return users != null && !users.isEmpty();
     }
 
-    private static boolean hasCategories(List<Long> categories) {
+    public static boolean hasCategories(List<Long> categories) {
         return categories != null && !categories.isEmpty();
     }
 
-    private static boolean hasDateRange(String start, String end) {
-        return start != null || end != null;
+    public static boolean hasDateRange(String rangeStart, String rangeEnd) {
+        return rangeStart != null || rangeEnd != null;
     }
 
     public static boolean hasText(String text) {
