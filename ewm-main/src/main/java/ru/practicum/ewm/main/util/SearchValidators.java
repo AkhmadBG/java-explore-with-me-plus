@@ -16,15 +16,11 @@ public class SearchValidators {
         return categories != null && !categories.isEmpty();
     }
 
-    public static boolean hasDateRange(String rangeStart, String rangeEnd) {
-        return rangeStart != null || rangeEnd != null;
-    }
-
     public static boolean hasText(String text) {
         return text != null && !text.isBlank();
     }
 
-    public static boolean hasStates(EventState states) {
+    public static boolean hasStates(List<EventState> states) {
         return states != null;
     }
 
