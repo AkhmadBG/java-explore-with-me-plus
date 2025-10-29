@@ -1,64 +1,69 @@
 package ru.practicum.ewm.stats.client;
 
 import jakarta.servlet.http.HttpServletRequest;
-import ru.practicum.ewm.main.entity.Event;
-import ru.practicum.ewm.main.service.statistics.StatisticsService;
 import ru.practicum.ewm.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import static ru.practicum.ewm.main.util.DateFormatter.format;
+import static ru.practicum.ewm.stats.dto.util.DateFormatter.format;
 
 public class StatisticsServiceImpl implements StatisticsService {
+
     @Override
     public List<ViewStats> getStats(String start, String end, List<String> uris) {
         return List.of();
     }
 
     @Override
-    public void sendStat(Event event, HttpServletRequest request) {
+    public void sendStats(List<Long> eventIds, HttpServletRequest request) {
 
     }
 
     @Override
-    public void sendStat(List<Event> events, HttpServletRequest request) {
-        events.forEach(event -> sendStat(events, request));
-    }
+    public Map<Long, Long> getEventsViews(List<Long> eventIds, HttpServletRequest request, boolean sendHit) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
 
-    @Override
-    public void setView(Event event) {
-        setView(List.of(event));
-    }
+        if (sendHit && request != null) {
+            sendStats(eventIds, request);
+        }
 
-    @Override
-    public void setView(List<Event> events) {
-        if (events == null || events.isEmpty()) return;
-
-        LocalDateTime start = events.stream()
-                .map(Event::getCreatedOn)
-                .filter(Objects::nonNull)
-                .min(LocalDateTime::compareTo)
-                .orElse(LocalDateTime.now().minusYears(1));
-
-        List<String> uris = events.stream()
-                .map(event -> "/events/" + event.getId())
+        List<String> uris = eventIds.stream()
+                .map(id -> "/events/" + id)
                 .collect(Collectors.toList());
 
-        List<ViewStats> stats = getStats(format(start), format(LocalDateTime.now()), uris);
+        LocalDateTime start = LocalDateTime.now().minusYears(1);
+        LocalDateTime end = LocalDateTime.now();
 
-        Map<String, Long> viewsMap = stats.stream()
-                .collect(Collectors.toMap(
-                        ViewStats::getUri,
-                        ViewStats::getHits,
-                        (existing, replacement) -> existing));
+        List<ViewStats> stats = getStats(format(start), format(end), uris);
 
-        for (Event event : events) {
-            String uri = "/events/" + event.getId();
-            event.setViews(viewsMap.getOrDefault(uri, 0L));
+        Map<Long, Long> viewsMap = new HashMap<>();
+        eventIds.forEach(id -> viewsMap.put(id, 0L));
+
+        stats.forEach(stat -> {
+            Long eventId = extractEventIdFromUri(stat.getUri());
+            if (eventId != null && viewsMap.containsKey(eventId)) {
+                viewsMap.put(eventId, stat.getHits());
+            }
+        });
+        return viewsMap;
+    }
+
+    private Long extractEventIdFromUri(String uri) {
+        if (uri == null || !uri.startsWith("/events/")) {
+            return null;
+        }
+        try {
+            String idStr = uri.substring("/events/".length());
+            return Long.parseLong(idStr);
+        } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
+            return null;
         }
     }
 }
