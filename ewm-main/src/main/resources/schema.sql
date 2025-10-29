@@ -1,9 +1,9 @@
 --таблица для запуска приложения, с пустым файлом не запускается
 CREATE TABLE IF NOT EXISTS users (
-    id BIGSERIAL PRIMARY KEY,
-    username VARCHAR(255),
-    email VARCHAR(255)
-    );
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    email VARCHAR(255) NOT NULL UNIQUE
+);
 
 -- таблица для определения локации
 CREATE TABLE IF NOT EXISTS LOCATIONS
@@ -45,6 +45,14 @@ CREATE TABLE IF NOT EXISTS EVENTS
     CONSTRAINT EVENTS_USERS_ID_FK
         FOREIGN KEY (INITIATOR_ID)
             REFERENCES USERS (ID) ON DELETE CASCADE
+);
+
+CREATE TABLE participation_requests (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    requester_id BIGINT NOT NULL,
+    event_id BIGINT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    created TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- таблица подборок

@@ -1,0 +1,11 @@
+package ru.practicum.ewm.main.repository;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import ru.practicum.ewm.main.entity.ParticipationRequest;
+
+import java.util.List;
+
+public interface ParticipationRequestRepository extends JpaRepository<ParticipationRequest, Long> {
+    List<ParticipationRequest> findByRequesterId(Long userId);
+    Boolean existsByRequesterIdAndEventId(Long requesterId, Long eventId);
+}
