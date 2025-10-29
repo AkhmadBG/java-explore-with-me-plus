@@ -21,6 +21,9 @@ public class AdminEventSearchRequest {
     private Integer from;
     private Integer size;
 
+    private static final Integer DEFAULT_FROM = 0;
+    private static final Integer DEFAULT_SIZE = 10;
+
     public static AdminEventSearchRequest fromParams(
             List<Long> users,
             List<EventState> states,
@@ -36,8 +39,8 @@ public class AdminEventSearchRequest {
                 .categories(categories)
                 .rangeStart(rangeStart)
                 .rangeEnd(rangeEnd)
-                .from(from)
-                .size(size)
+                .from(from != null ? from : DEFAULT_FROM)
+                .size(size != null ? size : DEFAULT_SIZE)
                 .build();
     }
 }

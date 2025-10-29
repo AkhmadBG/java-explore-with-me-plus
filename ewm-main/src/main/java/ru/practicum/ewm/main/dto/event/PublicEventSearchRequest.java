@@ -23,6 +23,9 @@ public class PublicEventSearchRequest {
     private Integer from;
     private Integer size;
 
+    private static final Integer DEFAULT_FROM = 0;
+    private static final Integer DEFAULT_SIZE = 10;
+
     public static PublicEventSearchRequest fromParams(
             String text,
             List<Long> categories,
@@ -42,8 +45,8 @@ public class PublicEventSearchRequest {
                 .rangeEnd(rangeEnd)
                 .onlyAvailable(onlyAvailable != null ? onlyAvailable : false)
                 .sort(sort)
-                .from(from != null ? from : 0)
-                .size(size != null ? size : 10)
+                .from(from != null ? from : DEFAULT_FROM)
+                .size(size != null ? size : DEFAULT_SIZE)
                 .build();
     }
 }
