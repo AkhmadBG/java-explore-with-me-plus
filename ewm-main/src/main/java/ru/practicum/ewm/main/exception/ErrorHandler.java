@@ -17,11 +17,21 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleValidation(final Exception e, HttpStatus status) {
         log.info("500 {}", e.getMessage(), e);
-        StringWriter sw = new StringWriter();
-        PrintWriter pw = new PrintWriter(sw);
-        e.printStackTrace(pw);
-        String stackTrace = sw.toString();
+        String stackTrace = getStackTrace(e);
         return new ApiError(status, "Error ...", e.getMessage(), stackTrace);
     }
 
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleNotFoundException(NotFoundException e, HttpStatus status) {
+        String stackTrace = getStackTrace(e);
+        return new ApiError(status, "The required object was not found.", e.getMessage(), stackTrace);
+    }
+
+    private String getStackTrace(Exception e) {
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        return sw.toString();
+    }
 }
