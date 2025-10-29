@@ -52,7 +52,7 @@ public class Event {
     @Column(name = "participant_limit", nullable = false)
     private Integer participantLimit = 0;
 
-    @Column(name = "published_on", nullable = false)
+    @Column(name = "published_on")
     private LocalDateTime publishedOn;
 
     @Column(name = "request_moderation", nullable = false)

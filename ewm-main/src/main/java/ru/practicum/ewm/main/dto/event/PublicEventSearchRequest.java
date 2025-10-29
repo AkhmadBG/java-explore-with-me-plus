@@ -22,4 +22,31 @@ public class PublicEventSearchRequest {
     private SortValue sort;
     private Integer from;
     private Integer size;
+
+    private static final Integer DEFAULT_FROM = 0;
+    private static final Integer DEFAULT_SIZE = 10;
+
+    public static PublicEventSearchRequest fromParams(
+            String text,
+            List<Long> categories,
+            Boolean paid,
+            String rangeStart,
+            String rangeEnd,
+            Boolean onlyAvailable,
+            SortValue sort,
+            Integer from,
+            Integer size) {
+
+        return PublicEventSearchRequest.builder()
+                .text(text)
+                .categories(categories)
+                .paid(paid)
+                .rangeStart(rangeStart)
+                .rangeEnd(rangeEnd)
+                .onlyAvailable(onlyAvailable != null ? onlyAvailable : false)
+                .sort(sort)
+                .from(from != null ? from : DEFAULT_FROM)
+                .size(size != null ? size : DEFAULT_SIZE)
+                .build();
+    }
 }
