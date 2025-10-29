@@ -34,15 +34,17 @@ public class UserServiceImpl implements UserService {
         if (repository.existsByEmail(email)) {
             throw new ConflictException("User with email=%s already exists.".formatted(email));
         }
+
         User user = UserMapper.toEntity(newUser);
         return UserMapper.toDto(repository.save(user));
     }
 
     @Override
     public void deleteUser(Long userId) {
-        if(!repository.existsById(userId)) {
+        if (!repository.existsById(userId)) {
             throw new NotFoundException("User with id=%d not found.".formatted(userId));
         }
+
         repository.deleteById(userId);
     }
 }

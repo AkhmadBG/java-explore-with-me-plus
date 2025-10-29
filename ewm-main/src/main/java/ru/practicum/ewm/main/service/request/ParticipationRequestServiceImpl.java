@@ -20,7 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ParticipationRequestServiceImpl implements ParticipationRequestService{
+public class ParticipationRequestServiceImpl implements ParticipationRequestService {
 
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
@@ -43,12 +43,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (event.getInitiator().getId().equals(userId)) {
             throw new ConflictException("Initiator cannot request own event");
         }
+
         if (event.getState() != EventState.PUBLISHED) {
             throw new ConflictException("Event is not published");
         }
+
         if (requestRepository.existsByRequesterIdAndEventId(userId, eventId)) {
             throw new ConflictException("Request already exists");
         }
+
         if (event.getParticipantLimit() > 0 && event.getConfirmedRequests() >= event.getParticipantLimit()) {
             throw new ConflictException("Participant limit reached");
         }

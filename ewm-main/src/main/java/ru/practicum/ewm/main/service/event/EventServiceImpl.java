@@ -101,7 +101,7 @@ public class EventServiceImpl implements EventService {
         updateEventFieldsFromUserDto(event, updateEventUserDto);
 
         if (updateEventUserDto.getStateAction() != null) {
-            switch(updateEventUserDto.getStateAction()) {
+            switch (updateEventUserDto.getStateAction()) {
                 case SEND_TO_REVIEW:
                     event.setState(EventState.PENDING);
                     break;
@@ -110,6 +110,7 @@ public class EventServiceImpl implements EventService {
                     break;
             }
         }
+
         Event updatedEvent = eventRepository.save(event);
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -161,6 +162,7 @@ public class EventServiceImpl implements EventService {
                     break;
             }
         }
+
         Event updatedEvent = eventRepository.save(event);
         return EventMapper.toEventFullDto(updatedEvent);
     }
@@ -221,6 +223,7 @@ public class EventServiceImpl implements EventService {
                             event.getConfirmedRequests() < event.getParticipantLimit())
                     .collect(Collectors.toList());
         }
+
         if (shouldSort(request.getSort())) {
             Comparator<Event> comparator = request.getSort() == SortValue.VIEWS ?
                     Comparator.comparing(Event::getViews, Comparator.nullsLast(Long::compareTo)).reversed() :
@@ -229,6 +232,7 @@ public class EventServiceImpl implements EventService {
                     .sorted(comparator)
                     .collect(Collectors.toList());
         }
+
         if (events.isEmpty()) {
             return new ArrayList<>();
         }
@@ -250,15 +254,18 @@ public class EventServiceImpl implements EventService {
         if (dto.getAnnotation() != null) {
             event.setAnnotation(dto.getAnnotation());
         }
+
         if (dto.getCategory() != null) {
             Category category = categoryRepository.findById(dto.getCategory())
                     .orElseThrow(() -> new CategoryNotExistException("Category with id=" + dto.getCategory() +
                             " was not found"));
             event.setCategory(category);
         }
+
         if (dto.getDescription() != null) {
             event.setDescription(dto.getDescription());
         }
+
         if (dto.getEventDate() != null) {
             LocalDateTime newEventDate = parse(dto.getEventDate());
             if (newEventDate.isBefore(LocalDateTime.now().plusHours(2))) {
@@ -266,21 +273,26 @@ public class EventServiceImpl implements EventService {
             }
             event.setEventDate(newEventDate);
         }
+
         if (dto.getLocation() != null) {
             Location location = new Location();
             location.setLat(dto.getLocation().getLat());
             location.setLon(dto.getLocation().getLon());
             event.setLocation(location);
         }
+
         if (dto.getPaid() != null) {
             event.setPaid(dto.getPaid());
         }
+
         if (dto.getParticipantLimit() != null) {
             event.setParticipantLimit(dto.getParticipantLimit());
         }
+
         if (dto.getRequestModeration() != null) {
             event.setRequestModeration(dto.getRequestModeration());
         }
+
         if (dto.getTitle() != null) {
             event.setTitle(dto.getTitle());
         }
@@ -297,9 +309,11 @@ public class EventServiceImpl implements EventService {
                             " was not found"));
             event.setCategory(category);
         }
+
         if (dto.getDescription() != null) {
             event.setDescription(dto.getDescription());
         }
+
         if (dto.getEventDate() != null) {
             LocalDateTime newEventDate = parse(dto.getEventDate());
             if (event.getPublishedOn() != null && newEventDate.isBefore(event.getPublishedOn().plusHours(1))) {
@@ -310,21 +324,26 @@ public class EventServiceImpl implements EventService {
             }
             event.setEventDate(newEventDate);
         }
+
         if (dto.getLocation() != null) {
             Location location = new Location();
             location.setLat(dto.getLocation().getLat());
             location.setLon(dto.getLocation().getLon());
             event.setLocation(location);
         }
+
         if (dto.getPaid() != null) {
             event.setPaid(dto.getPaid());
         }
+
         if (dto.getParticipantLimit() != null) {
             event.setParticipantLimit(dto.getParticipantLimit());
         }
+
         if (dto.getRequestModeration() != null) {
             event.setRequestModeration(dto.getRequestModeration());
         }
+
         if (dto.getTitle() != null) {
             event.setTitle(dto.getTitle());
         }
@@ -339,22 +358,27 @@ public class EventServiceImpl implements EventService {
             Predicate categoryFilter = root.get("category").get("id").in(request.getCategories());
             predicates.add(categoryFilter);
         }
+
         if (hasUsers(request.getUsers())) {
             Predicate userFilter = root.get("initiator").get("id").in(request.getUsers());
             predicates.add(userFilter);
         }
+
         if (hasStates(request.getStates())) {
             Predicate stateFilter = root.get("state").in(request.getStates());
             predicates.add(stateFilter);
         }
+
         if (start != null) {
             Predicate startDateFilter = builder.greaterThanOrEqualTo(root.get("eventDate"), start);
             predicates.add(startDateFilter);
         }
+
         if (end != null) {
             Predicate endDateFilter = builder.lessThanOrEqualTo(root.get("eventDate"), end);
             predicates.add(endDateFilter);
         }
+
         return predicates;
     }
 
@@ -373,24 +397,29 @@ public class EventServiceImpl implements EventService {
             Predicate textSearch = builder.or(annotationMatch, descriptionMatch);
             predicates.add(textSearch);
         }
+
         if (hasCategories(request.getCategories())) {
             Predicate categoryFilter = root.get("category").get("id").in(request.getCategories());
             predicates.add(categoryFilter);
         }
+
         if (request.getPaid() != null) {
             Predicate paidFilter = request.getPaid() ?
                     builder.isTrue(root.get("paid")) :
                     builder.isFalse(root.get("paid"));
             predicates.add(paidFilter);
         }
+
         if (start != null) {
             Predicate startDateFilter = builder.greaterThanOrEqualTo(root.get("eventDate"), start);
             predicates.add(startDateFilter);
         }
+
         if (end != null) {
             Predicate endDateFilter = builder.lessThanOrEqualTo(root.get("eventDate"), end);
             predicates.add(endDateFilter);
         }
+
         return predicates;
     }
 

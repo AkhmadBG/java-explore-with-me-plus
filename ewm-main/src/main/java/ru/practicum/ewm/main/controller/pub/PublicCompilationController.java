@@ -6,9 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.service.compilation.CompilationService;
 
-import java.awt.print.Pageable;
-import java.util.List;
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/compilations")
