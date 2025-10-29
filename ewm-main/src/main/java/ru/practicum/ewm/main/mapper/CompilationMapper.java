@@ -34,7 +34,7 @@ public class CompilationMapper {
                 .build();
     }
 
-    public static void updateCompilation(Compilation compilation,
+    public void updateCompilation(Compilation compilation,
                                                 UpdateCompilationRequest updateCompilationRequest,
                                                 List<Event> events) {
         if (updateCompilationRequest.hasTitle()) {

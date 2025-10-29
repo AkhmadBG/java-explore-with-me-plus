@@ -66,7 +66,7 @@ public class CompilationServiceImpl implements CompilationService {
                     .map(eventServiceImpl::getEventById)
                     .toList();
         }
-        CompilationMapper.updateCompilation(compilation, updateCompilationRequest, events);
+        compilationMapper.updateCompilation(compilation, updateCompilationRequest, events);
         Compilation updateCompilation = compilationRepository.save(compilation);
         return compilationMapper.toCompilationDto(updateCompilation);
     }
