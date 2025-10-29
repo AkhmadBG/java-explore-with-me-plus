@@ -240,6 +240,12 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public Event getEventById(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
+    }
+
     private void updateEventFieldsFromUserDto(Event event, UpdateEventUserDto dto) {
         if (dto.getAnnotation() != null) {
             event.setAnnotation(dto.getAnnotation());

@@ -9,7 +9,7 @@ import ru.practicum.ewm.main.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.main.dto.compilation.UpdateCompilationRequest;
 import ru.practicum.ewm.main.entity.Compilation;
 import ru.practicum.ewm.main.entity.Event;
-import ru.practicum.ewm.main.exception.NotfoundException;
+import ru.practicum.ewm.main.exception.NotFoundException;
 import ru.practicum.ewm.main.mapper.CompilationMapper;
 import ru.practicum.ewm.main.repository.CompilationRepository;
 import ru.practicum.ewm.main.service.event.EventServiceImpl;
@@ -34,7 +34,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto getCompilationById(Long compId) {
         Compilation compilation = compilationRepository
-                .findById(compId).orElseThrow(() -> new NotfoundException("подборка не найдена"));
+                .findById(compId).orElseThrow(() -> new NotFoundException("подборка не найдена"));
         return compilationMapper.toCompilationDto(compilation);
     }
 
@@ -59,7 +59,7 @@ public class CompilationServiceImpl implements CompilationService {
     @Override
     public CompilationDto updateCompilationById(Long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = compilationRepository.findById(compId)
-                .orElseThrow(() -> new NotfoundException("подборка не найдена"));
+                .orElseThrow(() -> new NotFoundException("подборка не найдена"));
         List<Event> events = new ArrayList<>();
         if (updateCompilationRequest.hasEvents()) {
             events = updateCompilationRequest.getEvents().stream()
