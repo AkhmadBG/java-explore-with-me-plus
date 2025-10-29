@@ -27,6 +27,7 @@ public class Event {
     private Category category;
 
     @Column(name = "confirmed_requests")
+    @Builder.Default
     private Long confirmedRequests = 0L;
 
     @Column(name = "description", columnDefinition = "TEXT")
@@ -47,24 +48,29 @@ public class Event {
     private Location location;
 
     @Column(name = "paid", nullable = false)
+    @Builder.Default
     private Boolean paid = false;
 
     @Column(name = "participant_limit", nullable = false)
+    @Builder.Default
     private Integer participantLimit = 0;
 
     @Column(name = "published_on")
     private LocalDateTime publishedOn;
 
     @Column(name = "request_moderation", nullable = false)
+    @Builder.Default
     private Boolean requestModeration = true;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "state", nullable = false)
+    @Builder.Default
     private EventState state = EventState.PENDING;
 
     @Column(name = "title", length = 120, nullable = false)
     private String title;
 
     @Column(name = "views")
+    @Builder.Default
     private Long views = 0L;
 }

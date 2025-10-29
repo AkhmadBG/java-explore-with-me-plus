@@ -27,4 +27,5 @@ public interface EventService {
     List<EventFullDto> getEventsWithParamsByUser(PublicEventSearchRequest request, HttpServletRequest httpRequest);
 
     Event getEventById(Long eventId);
+
 }

@@ -3,6 +3,8 @@ package ru.practicum.ewm.main.service.request;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
+import ru.practicum.ewm.main.dto.request.UpdateParticipationRequestDto;
 import ru.practicum.ewm.main.entity.Event;
 import ru.practicum.ewm.main.entity.ParticipationRequest;
 import ru.practicum.ewm.main.entity.User;
@@ -78,4 +80,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         request.setStatus(RequestStatus.CANCELED);
         return requestRepository.save(request);
     }
+
+    @Override
+    public List<ParticipationRequestDto> getUserRequestsByEventId(Long userId, Long eventId) {
+        return List.of();
+    }
+
+    @Override
+    public ParticipationRequestDto updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateParticipationRequestDto) {
+        return null;
+    }
+
 }
