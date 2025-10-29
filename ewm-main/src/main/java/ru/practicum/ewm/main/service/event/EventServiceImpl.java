@@ -23,7 +23,7 @@ import ru.practicum.ewm.main.mapper.EventMapper;
 import ru.practicum.ewm.main.repository.CategoryRepository;
 import ru.practicum.ewm.main.repository.EventRepository;
 import ru.practicum.ewm.main.repository.UserRepository;
-import ru.practicum.ewm.main.service.statistics.StatisticsService;
+import ru.practicum.ewm.stats.client.StatisticsService;
 
 import java.time.LocalDateTime;
 import java.util.*;
@@ -78,7 +78,14 @@ public class EventServiceImpl implements EventService {
 
         Page<Event> eventsPage = eventRepository.findAllByInitiator(userId, pageable);
         if (eventsPage.hasContent()) {
-            statisticsService.setView(eventsPage.getContent());
+            List<Long> eventIds = eventsPage.getContent().stream()
+                    .map(Event::getId)
+                    .collect(Collectors.toList());
+
+            Map<Long, Long> viewsMap = statisticsService.getEventsViews(eventIds, null, false);
+            eventsPage.getContent().forEach(event ->
+                    event.setViews(viewsMap.getOrDefault(event.getId(), 0L))
+            );
         }
         return eventsPage.map(EventMapper::toEventShortDto);
     }
@@ -121,7 +128,9 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
 
-        statisticsService.setView(List.of(event));
+        Map<Long, Long> viewsMap = statisticsService.getEventsViews(List.of(eventId), null, false);
+        event.setViews(viewsMap.getOrDefault(eventId, 0L));
+
         return EventMapper.toEventFullDto(event);
     }
 
@@ -173,8 +182,8 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findByIdAndPublishedOnIsNotNull(eventId)
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
 
-        statisticsService.sendStat(event, request);
-        statisticsService.setView(List.of(event));
+        Map<Long, Long> viewsMap = statisticsService.getEventsViews(List.of(eventId), request, true);
+        event.setViews(viewsMap.getOrDefault(eventId, 0L));
 
         return EventMapper.toEventFullDto(event);
     }
@@ -203,7 +212,13 @@ public class EventServiceImpl implements EventService {
             return new ArrayList<>();
         }
 
-        statisticsService.setView(events);
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Long> viewsMap = statisticsService.getEventsViews(eventIds, null, false);
+        events.forEach(event -> event.setViews(viewsMap.getOrDefault(event.getId(), 0L)));
+
         return events.stream()
                 .map(EventMapper::toEventFullDto)
                 .collect(Collectors.toList());
@@ -224,6 +239,18 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
 
+        if (events.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        List<Long> eventIds = events.stream()
+                .map(Event::getId)
+                .collect(Collectors.toList());
+
+        Map<Long, Long> viewsMap = statisticsService.getEventsViews(eventIds, httpRequest, true);
+
+        events.forEach(event -> event.setViews(viewsMap.getOrDefault(event.getId(), 0L)));
+
         if (shouldSort(request.getSort())) {
             Comparator<Event> comparator = request.getSort() == SortValue.VIEWS ?
                     Comparator.comparing(Event::getViews, Comparator.nullsLast(Long::compareTo)).reversed() :
@@ -233,12 +260,6 @@ public class EventServiceImpl implements EventService {
                     .collect(Collectors.toList());
         }
 
-        if (events.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        statisticsService.setView(events);
-        statisticsService.sendStat(events, httpRequest);
         return events.stream()
                 .map(EventMapper::toEventFullDto)
                 .collect(Collectors.toList());
