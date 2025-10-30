@@ -10,7 +10,7 @@ import ru.practicum.ewm.main.service.category.CategoryService;
 @RequiredArgsConstructor
 @RequestMapping("/admin")
 public class AdminCategoryController {
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @PostMapping("/categories")
     public CategoryDto create(@Valid @RequestBody CategoryDto categoryDto) {

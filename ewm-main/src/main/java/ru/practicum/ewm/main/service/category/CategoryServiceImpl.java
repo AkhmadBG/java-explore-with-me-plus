@@ -15,7 +15,7 @@ import ru.practicum.ewm.main.repository.CategoryRepository;
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public CategoryDto createOrUpdate(CategoryDto categoryDto) {
