@@ -1,6 +1,8 @@
 package ru.practicum.ewm.main.mapper;
 
 import ru.practicum.ewm.main.dto.category.CategoryDto;
+import ru.practicum.ewm.main.dto.category.NewCategoryDto;
+import ru.practicum.ewm.main.dto.category.UpdateCategoryDto;
 import ru.practicum.ewm.main.entity.Category;
 
 public class CategoryMapper {
@@ -16,4 +18,15 @@ public class CategoryMapper {
                 .name(categoryDto.getName())
                 .build();
     }
+
+    public static Category toCategory(NewCategoryDto newCategoryDto) {
+        return Category.builder()
+                .name(newCategoryDto.getName())
+                .build();
+    }
+
+    public static void updateCategory(Category category, UpdateCategoryDto updateCategoryDto) {
+
+    }
+
 }

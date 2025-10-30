@@ -27,9 +27,9 @@ public class PrivateEventController {
 
     @GetMapping("/{userId}/events")
     public Page<EventShortDto> getEvents(@PathVariable Long userId,
-                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size) {
-        return eventService.getEvents(userId, PageRequest.of(page, size));
+        return eventService.getEvents(userId, PageRequest.of(from, size));
     }
 
     //    POST /users/{userId}/events Добавление нового события
