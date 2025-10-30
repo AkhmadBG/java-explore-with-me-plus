@@ -31,14 +31,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getAll(int from, int size) {
+    public Page<CategoryDto> getAll(int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(Sort.Direction.DESC, "id"));
         Page<Category> categories = categoryRepository.findAll(pageable);
 
-        return categories.getContent().stream()
-                .map(CategoryMapper::toCategoryDto)
-                .collect(Collectors.toList());
+        return categories.map(CategoryMapper::toCategoryDto);
     }
 
     @Override

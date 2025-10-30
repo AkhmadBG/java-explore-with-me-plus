@@ -180,8 +180,9 @@ public class EventServiceImpl implements EventService {
     @Override
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndPublishedOnIsNotNull(eventId)
-                .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
-
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+//        Event event = eventRepository.findById(eventId)
+//                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
         Map<Long, Long> viewsMap = statisticsService.getEventsViews(List.of(eventId), request, true);
         event.setViews(viewsMap.getOrDefault(eventId, 0L));
 
