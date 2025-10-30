@@ -11,8 +11,6 @@ import ru.practicum.ewm.main.exception.NotFoundException;
 import ru.practicum.ewm.main.mapper.CategoryMapper;
 import ru.practicum.ewm.main.entity.Category;
 import ru.practicum.ewm.main.repository.CategoryRepository;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
