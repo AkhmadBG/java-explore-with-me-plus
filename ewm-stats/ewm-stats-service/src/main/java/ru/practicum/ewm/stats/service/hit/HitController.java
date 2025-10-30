@@ -3,6 +3,7 @@ package ru.practicum.ewm.stats.service.hit;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.stats.dto.CreateHitDto;
 import ru.practicum.ewm.stats.dto.GetStatsDto;
@@ -20,11 +21,13 @@ public class HitController {
     private final HitService hitService;
 
     @PostMapping(path = "/users")
+    @ResponseStatus(HttpStatus.CREATED)
     public HitDto createUser(@RequestBody @Valid CreateHitDto hitCreateDto) {
         return hitService.create(hitCreateDto);
     }
 
     @PostMapping(path = "/hit")
+    @ResponseStatus(HttpStatus.CREATED)
     public HitDto create(@RequestBody @Valid CreateHitDto hitCreateDto) {
         return hitService.create(hitCreateDto);
     }
