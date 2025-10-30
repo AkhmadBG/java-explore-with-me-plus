@@ -25,11 +25,10 @@ public class Compilation {
     @NotBlank
     @Size(min = 1, max = 50)
     @Column(name = "title", nullable = false)
-    private String title; // Заголовок подборки
+    private String title;
 
-    @NotNull
-    @Column(name = "is_pinned", nullable = false)
-    private Boolean pinned; // Закреплена ли подборка на главной странице сайта
+    @Column(name = "is_pinned")
+    private Boolean pinned;
 
     @NotNull
     @ManyToMany

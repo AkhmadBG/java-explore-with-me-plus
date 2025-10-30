@@ -36,7 +36,6 @@ public class CategoryServiceImpl implements CategoryService {
     public List<CategoryDto> getAll(int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size, Sort.by("name").descending());
         Page<Category> categories = categoryRepository.findAll(pageable);
-
         return categories.getContent()
                 .stream()
                 .map(CategoryMapper::toCategoryDto)

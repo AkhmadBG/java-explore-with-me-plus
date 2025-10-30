@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.service.compilation.CompilationService;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(path = "/compilations")
@@ -14,10 +16,9 @@ public class PublicCompilationController {
     private final CompilationService compilationService;
 
     @GetMapping
-    public Page<CompilationDto> getCompilations(@RequestParam(defaultValue = "0") int page,
+    public List<CompilationDto> getCompilations(@RequestParam(defaultValue = "0") int from,
                                                 @RequestParam(defaultValue = "10") int size) {
-        Page<CompilationDto> compilationsDto = compilationService.getCompilations(page, size);
-        return compilationsDto;
+        return compilationService.getCompilations(from, size);
     }
 
     @GetMapping("/{compId}")

@@ -5,9 +5,11 @@ import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.main.dto.compilation.UpdateCompilationRequest;
 
+import java.util.List;
+
 public interface CompilationService {
 
-    Page<CompilationDto> getCompilations(int page, int size);
+    List<CompilationDto> getCompilations(int page, int size);
 
     CompilationDto getCompilationById(Long compId);
 
