@@ -3,8 +3,6 @@ package ru.practicum.ewm.main.service.category;
 import org.springframework.data.domain.Page;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 
-import java.util.List;
-
 public interface CategoryService {
     CategoryDto createOrUpdate(CategoryDto categoryDto);
 
