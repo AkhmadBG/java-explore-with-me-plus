@@ -1,6 +1,7 @@
 package ru.practicum.ewm.main.dto.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -33,7 +34,8 @@ public class NewEventDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = PATTERN)
     private String eventDate;
 
-    @NotBlank
+    @NotNull
+    @Valid
     private Location location;
 
     private Boolean paid;

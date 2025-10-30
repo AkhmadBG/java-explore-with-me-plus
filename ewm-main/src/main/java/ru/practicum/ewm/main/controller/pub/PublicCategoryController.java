@@ -10,7 +10,7 @@ import ru.practicum.ewm.main.service.category.CategoryService;
 @RequiredArgsConstructor
 @RequestMapping("/categories")
 public class PublicCategoryController {
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
     @GetMapping
     public Page<CategoryDto> getAll(@RequestParam(defaultValue = "0") int from,
