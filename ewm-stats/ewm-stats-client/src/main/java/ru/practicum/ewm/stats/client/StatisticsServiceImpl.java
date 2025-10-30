@@ -1,6 +1,7 @@
 package ru.practicum.ewm.stats.client;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Service;
 import ru.practicum.ewm.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.stats.dto.util.DateFormatter.format;
 
+@Service
 public class StatisticsServiceImpl implements StatisticsService {
 
     @Override

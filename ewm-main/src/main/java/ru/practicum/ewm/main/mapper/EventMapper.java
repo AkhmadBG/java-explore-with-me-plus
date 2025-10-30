@@ -9,6 +9,8 @@ import ru.practicum.ewm.main.entity.Location;
 import ru.practicum.ewm.main.entity.User;
 import ru.practicum.ewm.main.enums.EventState;
 
+import java.time.LocalDateTime;
+
 import static ru.practicum.ewm.main.util.DateFormatter.format;
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
 
@@ -19,6 +21,7 @@ public class EventMapper {
                 .category(category)
                 .description(newEventDto.getDescription())
                 .eventDate(parse(newEventDto.getEventDate()))
+                .createdOn(LocalDateTime.now())
                 .initiator(initiator)
                 .location(location)
                 .paid(newEventDto.getPaid() != null ? newEventDto.getPaid() : false)

@@ -3,6 +3,8 @@ package ru.practicum.ewm.main.service.request;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
+import ru.practicum.ewm.main.dto.request.UpdateParticipationRequestDto;
 import ru.practicum.ewm.main.entity.Event;
 import ru.practicum.ewm.main.entity.ParticipationRequest;
 import ru.practicum.ewm.main.entity.User;
@@ -61,7 +63,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         request.setEvent(event);
         request.setCreated(LocalDateTime.now());
         // ... если для события отключена пре-модерация запросов на участие, то запрос должен автоматически перейти в состояние подтвержденного
-        request.setStatus(event.getRequestModeration() == false ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
+//        request.setStatus(event.getRequestModeration() == false ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
+
+        //тестирую логику
+        if (event.getRequestModeration() && event.getParticipantLimit() != 0) {
+            request.setStatus(RequestStatus.PENDING); // требуется модерация
+        } else {
+            request.setStatus(RequestStatus.CONFIRMED); // автоматическое подтверждение
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1); // увеличение счетчика
+        }
 
         return requestRepository.save(request);
     }
@@ -78,4 +88,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         request.setStatus(RequestStatus.CANCELED);
         return requestRepository.save(request);
     }
+
+    @Override
+    public List<ParticipationRequestDto> getUserRequestsByEventId(Long userId, Long eventId) {
+        return List.of();
+    }
+
+    @Override
+    public ParticipationRequestDto updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateParticipationRequestDto) {
+        return null;
+    }
+
 }

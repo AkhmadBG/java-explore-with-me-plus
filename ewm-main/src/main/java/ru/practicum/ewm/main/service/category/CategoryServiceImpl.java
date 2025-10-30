@@ -11,13 +11,11 @@ import ru.practicum.ewm.main.exception.NotFoundException;
 import ru.practicum.ewm.main.mapper.CategoryMapper;
 import ru.practicum.ewm.main.entity.Category;
 import ru.practicum.ewm.main.repository.CategoryRepository;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
-    private CategoryRepository categoryRepository;
+    private final CategoryRepository categoryRepository;
 
     @Override
     public CategoryDto createOrUpdate(CategoryDto categoryDto) {
@@ -31,14 +29,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public List<CategoryDto> getAll(int from, int size) {
+    public Page<CategoryDto> getAll(int from, int size) {
         Pageable pageable = PageRequest.of(from / size, size,
                 Sort.by(Sort.Direction.DESC, "id"));
         Page<Category> categories = categoryRepository.findAll(pageable);
 
-        return categories.getContent().stream()
-                .map(CategoryMapper::toCategoryDto)
-                .collect(Collectors.toList());
+        return categories.map(CategoryMapper::toCategoryDto);
     }
 
     @Override

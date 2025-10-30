@@ -2,6 +2,7 @@ package ru.practicum.ewm.main.controller.priv;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
@@ -26,6 +27,7 @@ public class PrivateRequestController {
     }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto addRequest(@PathVariable @Valid Long userId,
                                               @RequestParam @Valid Long eventId) {
         return ParticipationRequestMapper.toDto(service.addRequest(userId, eventId));
