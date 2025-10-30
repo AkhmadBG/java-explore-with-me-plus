@@ -63,7 +63,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         request.setEvent(event);
         request.setCreated(LocalDateTime.now());
         // ... если для события отключена пре-модерация запросов на участие, то запрос должен автоматически перейти в состояние подтвержденного
-        request.setStatus(event.getRequestModeration() == false ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
+//        request.setStatus(event.getRequestModeration() == false ? RequestStatus.PENDING : RequestStatus.CONFIRMED);
+
+        //тестирую логику
+        if (event.getRequestModeration() && event.getParticipantLimit() != 0) {
+            request.setStatus(RequestStatus.PENDING); // требуется модерация
+        } else {
+            request.setStatus(RequestStatus.CONFIRMED); // автоматическое подтверждение
+            event.setConfirmedRequests(event.getConfirmedRequests() + 1); // увеличение счетчика
+        }
 
         return requestRepository.save(request);
     }
