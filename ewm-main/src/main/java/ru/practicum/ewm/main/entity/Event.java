@@ -11,7 +11,8 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "events")
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+//@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor()
 @AllArgsConstructor
 public class Event {
 
@@ -19,7 +20,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "annotation", length = 500, nullable = false)
+    @Column(name = "annotation", length = 2000, nullable = false)
     private String annotation;
 
     @ManyToOne

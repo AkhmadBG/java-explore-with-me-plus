@@ -26,7 +26,7 @@ public class CategoryMapper {
     }
 
     public static void updateCategory(Category category, UpdateCategoryDto updateCategoryDto) {
-
+        category.setName(updateCategoryDto.getName());
     }
 
 }

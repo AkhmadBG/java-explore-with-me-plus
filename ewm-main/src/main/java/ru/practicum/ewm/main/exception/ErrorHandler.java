@@ -1,8 +1,11 @@
 package ru.practicum.ewm.main.exception;
 
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -11,6 +14,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -83,6 +87,29 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
                 "Internal server error",
+                e.getMessage(),
+                stackTrace
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ApiError handleConstraintViolation(ConstraintViolationException e) {
+        String stackTrace = getStackTrace(e);
+        return new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Bad Request",
+                e.getMessage(),
+                stackTrace
+        );
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleMissingServletRequestParameter(MissingServletRequestParameterException e) {
+        String stackTrace = getStackTrace(e);
+        return new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Bad Request",
                 e.getMessage(),
                 stackTrace
         );
