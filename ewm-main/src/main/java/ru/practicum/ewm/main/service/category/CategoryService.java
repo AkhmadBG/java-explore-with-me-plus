@@ -7,7 +7,7 @@ import ru.practicum.ewm.main.dto.category.UpdateCategoryDto;
 import java.util.List;
 
 public interface CategoryService {
-    CategoryDto createOrUpdate(CategoryDto categoryDto);
+//    CategoryDto createOrUpdate(CategoryDto categoryDto);
 
     void delete(Long id);
 
