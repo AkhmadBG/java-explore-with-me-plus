@@ -243,6 +243,14 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEventsWithParamsByUser(PublicEventSearchRequest request,
                                                         HttpServletRequest httpRequest) {
+        if (request.getRangeStart() != null && request.getRangeEnd() != null) {
+            LocalDateTime start = parse(request.getRangeStart());
+            LocalDateTime end = parse(request.getRangeEnd());
+            if (start.isAfter(end)) {
+                throw new ValidationException("Range start cannot be after range end");
+            }
+        }
+
         LocalDateTime start = request.getRangeStart() != null ? parse(request.getRangeStart()) : null;
         LocalDateTime end = request.getRangeEnd() != null ? parse(request.getRangeEnd()) : null;
 
@@ -253,7 +261,6 @@ public class EventServiceImpl implements EventService {
                             event.getConfirmedRequests() < event.getParticipantLimit())
                     .collect(Collectors.toList());
         }
-
         if (events.isEmpty()) {
             return new ArrayList<>();
         }
