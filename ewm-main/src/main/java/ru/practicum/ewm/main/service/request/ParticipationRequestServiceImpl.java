@@ -145,7 +145,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         }
 
         if (updateDto.getStatus() == RequestStatus.CONFIRMED) {
-            long currentConfirmed = event.getConfirmedRequests();
+            long currentConfirmed = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
             long tryingToConfirm = requests.stream()
                     .filter(r -> r.getStatus() != RequestStatus.CONFIRMED)
                     .count();
@@ -163,21 +163,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         List<ParticipationRequest> updatedRequests = requestRepository.saveAll(requests);
 
-        updateEventConfirmedRequests(event, newStatus, requests);
+        updateEventConfirmedRequests(event);
 
         return ParticipationRequestMapper.toDto(updatedRequests.get(0));
     }
 
-    private void updateEventConfirmedRequests(Event event, RequestStatus newStatus, List<ParticipationRequest> requests) {
-        if (newStatus == RequestStatus.CONFIRMED) {
-            Long confirmedCount = requestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
-            event.setConfirmedRequests(confirmedCount);
-            log.info("Updated confirmedRequests to {} based on DB count", confirmedCount);
-        } else if (newStatus == RequestStatus.REJECTED) {
-            Long confirmedCount = requestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
-            event.setConfirmedRequests(confirmedCount);
-        }
-
+    private void updateEventConfirmedRequests(Event event) {
+        Long confirmedCount = requestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
+        event.setConfirmedRequests(confirmedCount);
         eventRepository.save(event);
+        log.info("Updated confirmedRequests to {} for event {}", confirmedCount, event.getId());
     }
 }
