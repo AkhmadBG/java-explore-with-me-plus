@@ -30,6 +30,7 @@ import ru.practicum.ewm.stats.client.StatisticsService;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
@@ -46,6 +47,8 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final StatisticsService statisticsService;
     private final EntityManager entityManager;
+
+    private final Map<String, Set<Long>> viewCache = new ConcurrentHashMap<>();
 
     // POST /users/{userId}/events
     @Override
@@ -185,20 +188,35 @@ public class EventServiceImpl implements EventService {
 
     // GET /events/{id}
     @Override
+    @Transactional
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndPublishedOnIsNotNull(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
-//        Event event = eventRepository.findById(eventId)
-//                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+
+        String clientIp = getClientIp(request);
+        boolean isUnique = isUniqueView(eventId, clientIp);
+
         Map<Long, Long> viewsMap = statisticsService.getEventsViews(List.of(eventId), request, true);
-        event.setViews(viewsMap.getOrDefault(eventId, 0L));
+        Long statsViews = viewsMap.getOrDefault(eventId, 0L);
+
+        Long newViews;
+        if (isUnique) {
+            newViews = event.getViews() + 1;
+        } else {
+            newViews = Math.max(statsViews, event.getViews());
+        }
+
+        if (!newViews.equals(event.getViews())) {
+            event.setViews(newViews);
+            event = eventRepository.save(event);
+        }
 
         return EventMapper.toEventFullDto(event);
     }
 
     // GET /admin/events
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public List<EventFullDto> getEventsWithParamsByAdmin(AdminEventSearchRequest request) {
         LocalDateTime start = request.getRangeStart() != null ? parse(request.getRangeStart()) : null;
         LocalDateTime end = request.getRangeEnd() != null ? parse(request.getRangeEnd()) : null;
@@ -225,16 +243,10 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        for (Long eventId : eventIds) {
-            eventRepository.updateConfirmedRequests(eventId, 1L);
-        }
-
-        List<Event> refreshedEvents = eventRepository.findAllById(eventIds);
-
         Map<Long, Long> viewsMap = statisticsService.getEventsViews(eventIds, null, false);
-        refreshedEvents.forEach(event -> event.setViews(viewsMap.getOrDefault(event.getId(), 0L)));
+        events.forEach(event -> event.setViews(viewsMap.getOrDefault(event.getId(), 0L)));
 
-        return refreshedEvents.stream()
+        return events.stream()
                 .map(EventMapper::toEventFullDto)
                 .collect(Collectors.toList());
     }
@@ -480,5 +492,13 @@ public class EventServiceImpl implements EventService {
                 .setFirstResult(request.getFrom())
                 .setMaxResults(request.getSize())
                 .getResultList();
+    }
+
+    private boolean isUniqueView(Long eventId, String clientIp) {
+        return viewCache.computeIfAbsent(clientIp, k -> new HashSet<>()).add(eventId);
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        return request.getRemoteAddr();
     }
 }

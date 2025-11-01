@@ -119,7 +119,13 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         List<Long> requestIds = updateDto.getRequestsId();
         if (requestIds == null || requestIds.isEmpty()) {
-            throw new ValidationException("Request IDs cannot be null or empty");
+            List<ParticipationRequest> pendingRequests = requestRepository.findByEventIdAndStatus(eventId, RequestStatus.PENDING);
+            if (pendingRequests.isEmpty()) {
+                throw new NotFoundException("No pending requests found for this event");
+            }
+            requestIds = pendingRequests.stream()
+                    .map(ParticipationRequest::getId)
+                    .collect(Collectors.toList());
         }
 
         List<ParticipationRequest> requests = requestRepository.findAllById(requestIds);
@@ -163,19 +169,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     }
 
     private void updateEventConfirmedRequests(Event event, RequestStatus newStatus, List<ParticipationRequest> requests) {
-        long countChange = 0;
-
         if (newStatus == RequestStatus.CONFIRMED) {
-            countChange = requests.stream()
-                    .filter(request -> request.getStatus() != RequestStatus.CONFIRMED)
-                    .count();
-            event.setConfirmedRequests(event.getConfirmedRequests() + countChange);
+            Long confirmedCount = requestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
+            event.setConfirmedRequests(confirmedCount);
+            log.info("Updated confirmedRequests to {} based on DB count", confirmedCount);
         } else if (newStatus == RequestStatus.REJECTED) {
-            countChange = requests.stream()
-                    .filter(request -> request.getStatus() == RequestStatus.CONFIRMED)
-                    .count();
-            event.setConfirmedRequests(Math.max(0, event.getConfirmedRequests() - countChange));
+            Long confirmedCount = requestRepository.countByEventIdAndStatus(event.getId(), RequestStatus.CONFIRMED);
+            event.setConfirmedRequests(confirmedCount);
         }
+
         eventRepository.save(event);
     }
 }
