@@ -46,7 +46,6 @@ public class EventFullDto {
     @NotNull
     private Boolean paid;
 
-
     private Integer participantLimit;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = PATTERN)

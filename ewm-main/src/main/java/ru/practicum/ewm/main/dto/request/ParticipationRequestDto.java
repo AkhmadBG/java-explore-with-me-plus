@@ -3,6 +3,8 @@ package ru.practicum.ewm.main.dto.request;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import ru.practicum.ewm.main.dto.event.EventShortDto;
+import ru.practicum.ewm.main.dto.user.UserShortDto;
 import ru.practicum.ewm.main.enums.RequestStatus;
 import ru.practicum.ewm.main.util.DateFormatter;
 
@@ -16,11 +18,9 @@ public class ParticipationRequestDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DateFormatter.PATTERN)
     private String created;
 
-    @NotNull
-    private Long eventId;
+    private Long requester;
 
-    @NotNull
-    private Long requesterId;
+    private Long event;
 
     private RequestStatus status;
 }
