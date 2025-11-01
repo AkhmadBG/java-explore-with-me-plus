@@ -153,6 +153,18 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler(AlreadyPublishedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleAlreadyPublishedException(final AlreadyPublishedException e) {
+        log.error("409 Conflict: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT,
+                "For the requested operation the conditions are not met.",
+                e.getMessage(),
+                getStackTrace(e)
+        );
+    }
+
     private String getStackTrace(Exception e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
