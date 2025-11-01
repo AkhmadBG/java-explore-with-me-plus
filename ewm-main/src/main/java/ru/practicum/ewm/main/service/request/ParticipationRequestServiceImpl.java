@@ -93,13 +93,15 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Override
     public List<ParticipationRequestDto> getUserRequestsByEventId(Long userId, Long eventId) {
-        if (!userRepository.existsById(userId)) {
-            throw new UserNotExistException("User with id=" + userId + " was not found");
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+
+        if (!event.getInitiator().getId().equals(userId)) {
+            throw new ForbiddenException("User is not the initiator of the event");
         }
-        if (!eventRepository.existsById(eventId)) {
-            throw new NotFoundException("Event with id=" + eventId + " was not found");
-        }
-        List<ParticipationRequest> requests = requestRepository.findAllByRequester_IdAndEvent_Id(userId, eventId);
+
+        List<ParticipationRequest> requests = requestRepository.findByEventId(eventId);
+
         return requests.stream()
                 .map(ParticipationRequestMapper::toDto)
                 .collect(Collectors.toList());
@@ -119,7 +121,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         if (requestIds == null || requestIds.isEmpty()) {
             List<ParticipationRequest> pendingRequests = requestRepository.findByEventIdAndStatus(eventId, RequestStatus.PENDING);
             if (pendingRequests.isEmpty()) {
-                throw new NotFoundException("No pending requests found for this event");
+                throw new ConflictException("No pending requests found for this event");
             }
             requestIds = pendingRequests.stream()
                     .map(ParticipationRequest::getId)
