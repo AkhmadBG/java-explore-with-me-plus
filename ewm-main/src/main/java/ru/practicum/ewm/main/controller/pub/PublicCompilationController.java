@@ -1,7 +1,6 @@
 package ru.practicum.ewm.main.controller.pub;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.service.compilation.CompilationService;

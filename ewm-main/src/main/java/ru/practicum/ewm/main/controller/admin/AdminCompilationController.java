@@ -33,5 +33,4 @@ public class AdminCompilationController {
                                                 @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest) {
         return compilationService.updateCompilationById(compId, updateCompilationRequest);
     }
-
 }

@@ -1,8 +1,6 @@
 package ru.practicum.ewm.main.controller.pub;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 import ru.practicum.ewm.main.service.category.CategoryService;
