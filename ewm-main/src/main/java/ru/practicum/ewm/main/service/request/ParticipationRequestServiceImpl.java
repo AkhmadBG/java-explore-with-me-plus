@@ -140,75 +140,33 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             }
         }
 
-        // ОБНОВЛЕННАЯ ЛОГИКА ПОДТВЕРЖДЕНИЯ ЗАЯВОК
         if (updateDto.getStatus() == RequestStatus.CONFIRMED) {
             long currentConfirmed = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-
-            // Фильтруем только те запросы, которые еще не подтверждены
-            List<ParticipationRequest> pendingRequestsToConfirm = requests.stream()
+            long tryingToConfirm = requests.stream()
                     .filter(r -> r.getStatus() != RequestStatus.CONFIRMED)
-                    .collect(Collectors.toList());
-
-            long tryingToConfirm = pendingRequestsToConfirm.size();
+                    .count();
 
             log.info("LIMIT CHECK - eventId: {}, current: {}, trying: {}, limit: {}",
                     eventId, currentConfirmed, tryingToConfirm, event.getParticipantLimit());
 
-            if (event.getParticipantLimit() > 0) {
-                long availableSlots = event.getParticipantLimit() - currentConfirmed;
+            if (event.getParticipantLimit() > 0 &&
+                    currentConfirmed + tryingToConfirm > event.getParticipantLimit()) {
+                throw new ConflictException("Participant limit exceeded");
+            }
+        }
 
-                if (availableSlots <= 0) {
-                    // Лимит уже исчерпан - отклоняем все запросы
-                    for (ParticipationRequest request : pendingRequestsToConfirm) {
-                        request.setStatus(RequestStatus.REJECTED);
-                    }
-                    log.warn("No available slots - rejecting all {} requests", tryingToConfirm);
-                } else if (tryingToConfirm > availableSlots) {
-                    // Подтверждаем только часть запросов, остальные отклоняем
-                    int confirmedCount = 0;
-                    for (ParticipationRequest request : pendingRequestsToConfirm) {
-                        if (confirmedCount < availableSlots) {
-                            request.setStatus(RequestStatus.CONFIRMED);
-                            confirmedCount++;
-                        } else {
-                            request.setStatus(RequestStatus.REJECTED);
-                        }
-                    }
-                    log.info("Confirmed {} out of {} requests due to limit", confirmedCount, tryingToConfirm);
-                } else {
-                    // Подтверждаем все запросы
-                    for (ParticipationRequest request : pendingRequestsToConfirm) {
-                        request.setStatus(RequestStatus.CONFIRMED);
-                    }
-                    log.info("Confirmed all {} requests", tryingToConfirm);
-                }
-            } else {
-                // Нет лимита - подтверждаем все
-                for (ParticipationRequest request : pendingRequestsToConfirm) {
-                    request.setStatus(RequestStatus.CONFIRMED);
-                }
-                log.info("No participant limit - confirmed all {} requests", tryingToConfirm);
-            }
-        } else {
-            // Для статуса REJECTED просто применяем его ко всем запросам
-            RequestStatus newStatus = updateDto.getStatus();
-            for (ParticipationRequest request : requests) {
-                if (request.getStatus() != RequestStatus.CONFIRMED) { // Не меняем уже подтвержденные
-                    request.setStatus(newStatus);
-                }
-            }
-            log.info("Set status {} for {} requests", newStatus, requests.size());
+        RequestStatus newStatus = updateDto.getStatus();
+        for (ParticipationRequest request : requests) {
+            request.setStatus(newStatus);
         }
 
         List<ParticipationRequest> updatedRequests = requestRepository.saveAll(requests);
+
         updateEventConfirmedRequests(event);
 
-        List<ParticipationRequestDto> result = updatedRequests.stream()
+        return updatedRequests.stream()
                 .map(ParticipationRequestMapper::toDto)
                 .collect(Collectors.toList());
-
-        log.info("Returning {} updated requests", result.size());
-        return result;
     }
 
     private void updateEventConfirmedRequests(Event event) {
