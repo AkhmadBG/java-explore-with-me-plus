@@ -2,6 +2,7 @@ package ru.practicum.ewm.main.controller.priv;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import ru.practicum.ewm.main.service.request.ParticipationRequestService;
 
 import java.util.List;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
@@ -70,9 +72,14 @@ public class PrivateEventController {
 
     //    PATCH /users/{userId}/events/{eventId}/requests Изменение статуса (подтверждена, отменена) заявок на участие в событии текущего пользователя
     @PatchMapping("/{userId}/events/{eventId}/requests")
-    public ParticipationRequestDto updateUserRequestsByEventId(@PathVariable Long userId,
-                                                               @PathVariable Long eventId,
-                                                               @Valid @RequestBody UpdateParticipationRequestDto updateParticipationRequestDto) {
+    public ParticipationRequestDto updateUserRequestsByEventId(
+            @PathVariable Long userId,
+            @PathVariable Long eventId,
+            @Valid @RequestBody UpdateParticipationRequestDto updateParticipationRequestDto) {
+
+        log.info("Received update request: userId={}, eventId={}, dto={}",
+                userId, eventId, updateParticipationRequestDto.toString());
+
         return participationRequestService.updateUserRequestsByEventId(userId, eventId, updateParticipationRequestDto);
     }
 

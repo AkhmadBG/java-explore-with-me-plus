@@ -3,19 +3,21 @@ package ru.practicum.ewm.main.mapper;
 import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.main.entity.ParticipationRequest;
 
-import java.time.format.DateTimeFormatter;
+import static ru.practicum.ewm.main.util.DateFormatter.format;
 
 public class ParticipationRequestMapper {
 
-    private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static ParticipationRequestDto toDto(ParticipationRequest request) {
+        if (request == null) {
+            return null;
+        }
 
-    public static ParticipationRequestDto toDto(ParticipationRequest pr) {
-        ParticipationRequestDto dto = new ParticipationRequestDto();
-        dto.setId(pr.getId());
-        dto.setEvent(pr.getEvent().getId());
-        dto.setRequester(pr.getRequester().getId());
-        dto.setStatus(pr.getStatus().name());
-        dto.setCreated(pr.getCreated().format(formatter));
-        return dto;
+        return ParticipationRequestDto.builder()
+                .id(request.getId())
+                .created(format(request.getCreated()))
+                .eventId(request.getEvent() != null ? request.getEvent().getId() : null)
+                .requesterId(request.getRequester() != null ? request.getRequester().getId() : null)
+                .status(request.getStatus())
+                .build();
     }
 }

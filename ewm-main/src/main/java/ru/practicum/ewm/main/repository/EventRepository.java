@@ -3,6 +3,9 @@ package ru.practicum.ewm.main.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.main.entity.Event;
 
@@ -22,4 +25,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Optional<Event> findByIdAndPublishedOnIsNotNull(Long id);
 
+    @Modifying
+    @Query("UPDATE Event e SET e.confirmedRequests = :count WHERE e.id = :eventId")
+    void updateConfirmedRequests(@Param("eventId") Long eventId, @Param("count") Long count);
 }

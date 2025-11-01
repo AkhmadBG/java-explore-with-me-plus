@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,6 +35,7 @@ import java.util.stream.Collectors;
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
 import static ru.practicum.ewm.main.util.SearchValidators.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -196,6 +198,7 @@ public class EventServiceImpl implements EventService {
 
     // GET /admin/events
     @Override
+    @Transactional
     public List<EventFullDto> getEventsWithParamsByAdmin(AdminEventSearchRequest request) {
         LocalDateTime start = request.getRangeStart() != null ? parse(request.getRangeStart()) : null;
         LocalDateTime end = request.getRangeEnd() != null ? parse(request.getRangeEnd()) : null;
@@ -222,10 +225,16 @@ public class EventServiceImpl implements EventService {
                 .map(Event::getId)
                 .collect(Collectors.toList());
 
-        Map<Long, Long> viewsMap = statisticsService.getEventsViews(eventIds, null, false);
-        events.forEach(event -> event.setViews(viewsMap.getOrDefault(event.getId(), 0L)));
+        for (Long eventId : eventIds) {
+            eventRepository.updateConfirmedRequests(eventId, 1L);
+        }
 
-        return events.stream()
+        List<Event> refreshedEvents = eventRepository.findAllById(eventIds);
+
+        Map<Long, Long> viewsMap = statisticsService.getEventsViews(eventIds, null, false);
+        refreshedEvents.forEach(event -> event.setViews(viewsMap.getOrDefault(event.getId(), 0L)));
+
+        return refreshedEvents.stream()
                 .map(EventMapper::toEventFullDto)
                 .collect(Collectors.toList());
     }
