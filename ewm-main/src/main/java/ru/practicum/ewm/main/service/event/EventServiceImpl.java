@@ -8,7 +8,9 @@ import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.main.dto.event.*;
@@ -71,12 +73,13 @@ public class EventServiceImpl implements EventService {
 
     // GET /users/{userId}/events
     @Override
-    public Page<EventShortDto> getEvents(Long userId, Pageable pageable) {
+    public List<EventShortDto> getEvents(Long userId, int from, int size) {
         if (!userRepository.existsById(userId)) {
             throw new UserNotExistException("User with id=" + userId + " was not found");
         }
+        Pageable pageable = PageRequest.of(from / size, size, Sort.by("id").descending());
 
-        Page<Event> eventsPage = eventRepository.findAllByInitiator(userId, pageable);
+        Page<Event> eventsPage = eventRepository.findAllByInitiator_Id(userId, pageable);
         if (eventsPage.hasContent()) {
             List<Long> eventIds = eventsPage.getContent().stream()
                     .map(Event::getId)
@@ -87,7 +90,9 @@ public class EventServiceImpl implements EventService {
                     event.setViews(viewsMap.getOrDefault(event.getId(), 0L))
             );
         }
-        return eventsPage.map(EventMapper::toEventShortDto);
+        return eventsPage.getContent().stream()
+                .map(EventMapper::toEventShortDto)
+                .toList();
     }
 
     // PATCH /users/{userId}/events/{eventId}

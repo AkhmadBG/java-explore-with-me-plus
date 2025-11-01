@@ -26,10 +26,10 @@ public class PrivateEventController {
     private final ParticipationRequestService participationRequestService;
 
     @GetMapping("/{userId}/events")
-    public Page<EventShortDto> getEvents(@PathVariable Long userId,
+    public List<EventShortDto> getEvents(@PathVariable Long userId,
                                          @RequestParam(defaultValue = "0") int from,
                                          @RequestParam(defaultValue = "10") int size) {
-        return eventService.getEvents(userId, PageRequest.of(from, size));
+        return eventService.getEvents(userId, from, size);
     }
 
     //    POST /users/{userId}/events Добавление нового события
@@ -55,12 +55,18 @@ public class PrivateEventController {
         return eventService.updateEventByUser(userId, eventId, updateEventUserDto);
     }
 
-    //    GET /users/{userId}/events/{eventId}/requests Получение информации о запросах на участие в событии текущего пользователя
+//        GET /users/{userId}/events/{eventId}/requests Получение информации о запросах на участие в событии текущего пользователя
     @GetMapping("/{userId}/events/{eventId}/requests")
     public List<ParticipationRequestDto> getUserRequestsByEventId(@PathVariable Long userId,
                                                                   @PathVariable Long eventId) {
         return participationRequestService.getUserRequestsByEventId(userId, eventId);
     }
+
+//    @GetMapping("/{userId}/events/{eventId}/requests")
+//    public List<EventShortDto> getUserRequestsByEventId(@PathVariable Long userId,
+//                                                        @PathVariable Long eventId) {
+//        return eventService.getUserRequestsByEventId(userId, eventId);
+//    }
 
     //    PATCH /users/{userId}/events/{eventId}/requests Изменение статуса (подтверждена, отменена) заявок на участие в событии текущего пользователя
     @PatchMapping("/{userId}/events/{eventId}/requests")

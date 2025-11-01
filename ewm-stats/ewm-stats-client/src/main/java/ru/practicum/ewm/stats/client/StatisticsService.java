@@ -13,4 +13,5 @@ public interface StatisticsService {
     void sendStats(List<Long> eventIds, HttpServletRequest request);
 
     Map<Long, Long> getEventsViews(List<Long> eventIds, HttpServletRequest request, boolean sendHit);
+
 }

@@ -13,12 +13,17 @@ import ru.practicum.ewm.main.enums.RequestStatus;
 import ru.practicum.ewm.main.exception.ConflictException;
 import ru.practicum.ewm.main.exception.ForbiddenException;
 import ru.practicum.ewm.main.exception.NotFoundException;
+import ru.practicum.ewm.main.exception.UserNotExistException;
+import ru.practicum.ewm.main.mapper.ParticipationRequestMapper;
 import ru.practicum.ewm.main.repository.EventRepository;
 import ru.practicum.ewm.main.repository.ParticipationRequestRepository;
 import ru.practicum.ewm.main.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -91,11 +96,35 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Override
     public List<ParticipationRequestDto> getUserRequestsByEventId(Long userId, Long eventId) {
-        return List.of();
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotExistException("User with id=" + userId + " was not found");
+        }
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("Event with id=" + eventId + " was not found");
+        }
+        List<ParticipationRequest> requests = requestRepository.findAllByRequester_IdAndEvent_Id(userId, eventId);
+        return requests.stream()
+                .map(ParticipationRequestMapper::toDto)
+                .collect(Collectors.toList());
     }
+
 
     @Override
     public ParticipationRequestDto updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateParticipationRequestDto) {
+        if (!userRepository.existsById(userId)) {
+            throw new UserNotExistException("User with id=" + userId + " was not found");
+        }
+        if (!eventRepository.existsById(eventId)) {
+            throw new NotFoundException("Event with id=" + eventId + " was not found");
+        }
+        List<Optional<ParticipationRequest>> listRequests = updateParticipationRequestDto.getRequestsId().stream()
+                .map(requestRepository::findById)
+                .toList();
+        if (listRequests.isEmpty()) {
+            return null;
+        }
+//        requestRepository.findByRequester_IdAndEvent_Id()
+        
         return null;
     }
 
