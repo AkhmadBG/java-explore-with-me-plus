@@ -2,6 +2,7 @@ package ru.practicum.ewm.main.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -44,6 +45,18 @@ public class ErrorHandler {
                 "Integrity constraint has been violated.",
                 e.getMessage(),
                 stackTrace
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleDataIntegrityViolationException(final DataIntegrityViolationException e) {
+        log.error("409 Conflict: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT,
+                "Integrity constraint has been violated.",
+                "Database constraint violation",
+                getStackTrace(e)
         );
     }
 

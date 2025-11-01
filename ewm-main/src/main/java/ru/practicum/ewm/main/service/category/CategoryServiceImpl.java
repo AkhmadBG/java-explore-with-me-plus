@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 import ru.practicum.ewm.main.dto.category.NewCategoryDto;
 import ru.practicum.ewm.main.dto.category.UpdateCategoryDto;
+import ru.practicum.ewm.main.exception.ConflictException;
 import ru.practicum.ewm.main.exception.NotFoundException;
 import ru.practicum.ewm.main.mapper.CategoryMapper;
 import ru.practicum.ewm.main.entity.Category;
@@ -61,6 +62,16 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoryDto updateCategory(Long id, UpdateCategoryDto updateCategoryDto) {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Category with id=" + id + " was not found"));
+
+        if (updateCategoryDto.getName() != null &&
+                !updateCategoryDto.getName().equals(category.getName())) {
+
+            boolean nameExists = categoryRepository.existsByNameAndIdNot(updateCategoryDto.getName(), id);
+            if (nameExists) {
+                throw new ConflictException("Category name already exists");
+            }
+        }
+
         CategoryMapper.updateCategory(category, updateCategoryDto);
         Category updateCategory = categoryRepository.save(category);
         return CategoryMapper.toCategoryDto(updateCategory);
