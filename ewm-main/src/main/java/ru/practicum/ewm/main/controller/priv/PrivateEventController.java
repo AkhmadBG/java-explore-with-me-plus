@@ -64,7 +64,7 @@ public class PrivateEventController {
 
     //    PATCH /users/{userId}/events/{eventId}/requests Изменение статуса (подтверждена, отменена) заявок на участие в событии текущего пользователя
     @PatchMapping("/{userId}/events/{eventId}/requests")
-    public ParticipationRequestDto updateUserRequestsByEventId(
+    public List<ParticipationRequestDto> updateUserRequestsByEventId(
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @Valid @RequestBody UpdateParticipationRequestDto updateParticipationRequestDto) {

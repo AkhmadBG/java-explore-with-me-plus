@@ -109,7 +109,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Override
     @Transactional
-    public ParticipationRequestDto updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateDto) {
+    public List<ParticipationRequestDto> updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateDto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
@@ -165,7 +165,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         updateEventConfirmedRequests(event);
 
-        return ParticipationRequestMapper.toDto(updatedRequests.get(0));
+        return updatedRequests.stream()
+                .map(ParticipationRequestMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     private void updateEventConfirmedRequests(Event event) {

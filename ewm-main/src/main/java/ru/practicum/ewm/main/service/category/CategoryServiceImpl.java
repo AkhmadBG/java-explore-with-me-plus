@@ -14,6 +14,7 @@ import ru.practicum.ewm.main.exception.NotFoundException;
 import ru.practicum.ewm.main.mapper.CategoryMapper;
 import ru.practicum.ewm.main.entity.Category;
 import ru.practicum.ewm.main.repository.CategoryRepository;
+import ru.practicum.ewm.main.repository.EventRepository;
 
 import java.util.List;
 
@@ -21,6 +22,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final EventRepository eventRepository;
 
     @Override
     public CategoryDto createOrUpdate(CategoryDto categoryDto) {
@@ -30,6 +32,14 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public void delete(Long id) {
+        if (!categoryRepository.existsById(id)) {
+            throw new NotFoundException("Category with id=" + id + " was not found");
+        }
+
+        if (eventRepository.existsByCategoryId(id)) {
+            throw new ConflictException("Cannot delete category with id=" + id + " because it has linked events");
+        }
+
         categoryRepository.deleteById(id);
     }
 
