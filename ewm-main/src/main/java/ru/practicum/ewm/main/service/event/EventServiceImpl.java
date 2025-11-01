@@ -7,6 +7,7 @@ import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -29,11 +30,13 @@ import ru.practicum.ewm.stats.client.StatisticsService;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
 import static ru.practicum.ewm.main.util.SearchValidators.*;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -44,6 +47,8 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final StatisticsService statisticsService;
     private final EntityManager entityManager;
+
+    private final Map<String, Set<Long>> viewCache = new ConcurrentHashMap<>();
 
     // POST /users/{userId}/events
     @Override
@@ -183,19 +188,35 @@ public class EventServiceImpl implements EventService {
 
     // GET /events/{id}
     @Override
+    @Transactional
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
         Event event = eventRepository.findByIdAndPublishedOnIsNotNull(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
-//        Event event = eventRepository.findById(eventId)
-//                .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
+
+        String clientIp = getClientIp(request);
+        boolean isUnique = isUniqueView(eventId, clientIp);
+
         Map<Long, Long> viewsMap = statisticsService.getEventsViews(List.of(eventId), request, true);
-        event.setViews(viewsMap.getOrDefault(eventId, 0L));
+        Long statsViews = viewsMap.getOrDefault(eventId, 0L);
+
+        Long newViews;
+        if (isUnique) {
+            newViews = event.getViews() + 1;
+        } else {
+            newViews = Math.max(statsViews, event.getViews());
+        }
+
+        if (!newViews.equals(event.getViews())) {
+            event.setViews(newViews);
+            event = eventRepository.save(event);
+        }
 
         return EventMapper.toEventFullDto(event);
     }
 
     // GET /admin/events
     @Override
+    @Transactional(readOnly = true)
     public List<EventFullDto> getEventsWithParamsByAdmin(AdminEventSearchRequest request) {
         LocalDateTime start = request.getRangeStart() != null ? parse(request.getRangeStart()) : null;
         LocalDateTime end = request.getRangeEnd() != null ? parse(request.getRangeEnd()) : null;
@@ -234,6 +255,14 @@ public class EventServiceImpl implements EventService {
     @Override
     public List<EventFullDto> getEventsWithParamsByUser(PublicEventSearchRequest request,
                                                         HttpServletRequest httpRequest) {
+        if (request.getRangeStart() != null && request.getRangeEnd() != null) {
+            LocalDateTime start = parse(request.getRangeStart());
+            LocalDateTime end = parse(request.getRangeEnd());
+            if (start.isAfter(end)) {
+                throw new ValidationException("Range start cannot be after range end");
+            }
+        }
+
         LocalDateTime start = request.getRangeStart() != null ? parse(request.getRangeStart()) : null;
         LocalDateTime end = request.getRangeEnd() != null ? parse(request.getRangeEnd()) : null;
 
@@ -244,7 +273,6 @@ public class EventServiceImpl implements EventService {
                             event.getConfirmedRequests() < event.getParticipantLimit())
                     .collect(Collectors.toList());
         }
-
         if (events.isEmpty()) {
             return new ArrayList<>();
         }
@@ -464,5 +492,13 @@ public class EventServiceImpl implements EventService {
                 .setFirstResult(request.getFrom())
                 .setMaxResults(request.getSize())
                 .getResultList();
+    }
+
+    private boolean isUniqueView(Long eventId, String clientIp) {
+        return viewCache.computeIfAbsent(clientIp, k -> new HashSet<>()).add(eventId);
+    }
+
+    private String getClientIp(HttpServletRequest request) {
+        return request.getRemoteAddr();
     }
 }

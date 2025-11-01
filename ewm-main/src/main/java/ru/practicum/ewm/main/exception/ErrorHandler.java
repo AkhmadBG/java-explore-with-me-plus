@@ -2,8 +2,9 @@ package ru.practicum.ewm.main.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,7 +15,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -44,6 +44,18 @@ public class ErrorHandler {
                 "Integrity constraint has been violated.",
                 e.getMessage(),
                 stackTrace
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleDataIntegrityViolationException(final DataIntegrityViolationException e) {
+        log.error("409 Conflict: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT,
+                "Integrity constraint has been violated.",
+                "Database constraint violation",
+                getStackTrace(e)
         );
     }
 
@@ -79,6 +91,19 @@ public class ErrorHandler {
         return apiError;
     }
 
+    @ExceptionHandler(ValidationException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleValidationException(final ValidationException e) {
+        log.error("400 Bad Request: {}", e.getMessage(), e);
+        String stackTrace = getStackTrace(e);
+        return new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "Incorrectly made request.",
+                e.getMessage(),
+                stackTrace
+        );
+    }
+
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ApiError handleException(final Exception e) {
@@ -112,6 +137,54 @@ public class ErrorHandler {
                 "Bad Request",
                 e.getMessage(),
                 stackTrace
+        );
+    }
+
+    @ExceptionHandler(WrongTimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleWrongTimeException(final WrongTimeException e) {
+        log.error("400 Bad Request: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "For the requested operation the conditions are not met.",
+                e.getMessage(),
+                getStackTrace(e)
+        );
+    }
+
+    @ExceptionHandler(AlreadyPublishedException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleAlreadyPublishedException(final AlreadyPublishedException e) {
+        log.error("409 Conflict: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT,
+                "For the requested operation the conditions are not met.",
+                e.getMessage(),
+                getStackTrace(e)
+        );
+    }
+
+    @ExceptionHandler(EventAlreadyCanceledException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleEventAlreadyCanceledException(final EventAlreadyCanceledException e) {
+        log.error("409 Conflict: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT,
+                "For the requested operation the conditions are not met.",
+                e.getMessage(),
+                getStackTrace(e)
+        );
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiError handleHttpMessageNotReadableException(final HttpMessageNotReadableException e) {
+        log.error("409 Conflict: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.CONFLICT,
+                "Incorrectly made request.",
+                "Required request body is missing",
+                getStackTrace(e)
         );
     }
 

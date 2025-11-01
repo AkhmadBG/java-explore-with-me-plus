@@ -11,7 +11,6 @@ import ru.practicum.ewm.stats.service.hit.mapper.HitMapper;
 import ru.practicum.ewm.stats.service.hit.model.Hit;
 import ru.practicum.ewm.stats.service.hit.repository.HitRepository;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Slf4j

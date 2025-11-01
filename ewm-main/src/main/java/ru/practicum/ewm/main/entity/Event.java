@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "events")
-//@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor()
 @AllArgsConstructor
 public class Event {

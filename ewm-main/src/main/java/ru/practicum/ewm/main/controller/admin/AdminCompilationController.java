@@ -24,6 +24,7 @@ public class AdminCompilationController {
     }
 
     @DeleteMapping("/{compId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteCompilationById(@PathVariable("compId") Long compId) {
         compilationService.deleteCompilationById(compId);
     }
@@ -33,5 +34,4 @@ public class AdminCompilationController {
                                                 @Valid @RequestBody UpdateCompilationRequest updateCompilationRequest) {
         return compilationService.updateCompilationById(compId, updateCompilationRequest);
     }
-
 }
