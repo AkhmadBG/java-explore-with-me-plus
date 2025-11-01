@@ -128,6 +128,18 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler(WrongTimeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiError handleWrongTimeException(final WrongTimeException e) {
+        log.error("400 Bad Request: {}", e.getMessage(), e);
+        return new ApiError(
+                HttpStatus.BAD_REQUEST,
+                "For the requested operation the conditions are not met.",
+                e.getMessage(),
+                getStackTrace(e)
+        );
+    }
+
     private String getStackTrace(Exception e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);
