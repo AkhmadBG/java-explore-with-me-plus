@@ -1,11 +1,13 @@
 package ru.practicum.ewm.main.service.category;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 import ru.practicum.ewm.main.dto.category.NewCategoryDto;
 import ru.practicum.ewm.main.dto.category.UpdateCategoryDto;
@@ -61,15 +63,33 @@ public class CategoryServiceImpl implements CategoryService {
         return CategoryMapper.toCategoryDto(category);
     }
 
+//    @Override
+//    public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
+//        if (categoryRepository.existsByName(newCategoryDto.getName())) {
+//            throw new ConflictException("Category with name '" + newCategoryDto.getName() + "' already exists");
+//        }
+//        Category category = CategoryMapper.toCategory(newCategoryDto);
+//        Category newCategory = categoryRepository.save(category);
+//        return CategoryMapper.toCategoryDto(newCategory);
+//    }
+
     @Override
+    @Transactional
     public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
-        if (categoryRepository.existsByName(newCategoryDto.getName())) {
-            throw new ConflictException("Category with name '" + newCategoryDto.getName() + "' already exists");
+        try {
+            Category category = CategoryMapper.toCategory(newCategoryDto);
+
+            Category newCategory = categoryRepository.saveAndFlush(category);
+
+            return CategoryMapper.toCategoryDto(newCategory);
+
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException(
+                    "Category with name '" + newCategoryDto.getName() + "' already exists"
+            );
         }
-        Category category = CategoryMapper.toCategory(newCategoryDto);
-        Category newCategory = categoryRepository.save(category);
-        return CategoryMapper.toCategoryDto(newCategory);
     }
+
 
     @Override
     public CategoryDto updateCategory(Long id, UpdateCategoryDto updateCategoryDto) {
