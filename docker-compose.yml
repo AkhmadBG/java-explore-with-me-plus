@@ -11,8 +11,6 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://stats-db:5432/ewm-stats
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
-    networks:
-      - ewm-network
 
   stats-db:
     image: postgres:16.1
@@ -39,8 +37,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://ewm-db:5432/ewm-main
       - SPRING_DATASOURCE_USERNAME=dbuser
       - SPRING_DATASOURCE_PASSWORD=12345
-    networks:
-      - ewm-network
+      - STATS_SERVER_URL=http://stats-server:9090  # ← общение между контейнерами
 
   ewm-db:
     image: postgres:16.1
@@ -53,10 +50,6 @@ services:
       - POSTGRES_PASSWORD=12345
     volumes:
       - ewm_data:/var/lib/postgresql/data
-
-networks:
-  ewm-network:
-    driver: bridge
 
 volumes:
   stats_data:
