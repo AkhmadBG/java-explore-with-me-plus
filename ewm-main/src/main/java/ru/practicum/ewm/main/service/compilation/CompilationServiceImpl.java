@@ -18,6 +18,7 @@ import ru.practicum.ewm.main.service.event.EventServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +74,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (updateCompilationRequest.hasEvents()) {
             events = updateCompilationRequest.getEvents().stream()
                     .map(eventServiceImpl::getEventById)
-                    .toList();
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
         compilationMapper.updateCompilation(compilation, updateCompilationRequest, events);
         Compilation updateCompilation = compilationRepository.save(compilation);

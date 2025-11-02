@@ -8,6 +8,7 @@ import ru.practicum.ewm.main.dto.event.EventFullDto;
 import ru.practicum.ewm.main.entity.Compilation;
 import ru.practicum.ewm.main.entity.Event;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -44,7 +45,7 @@ public class CompilationMapper {
             compilation.setPinned(updateCompilationRequest.getPinned());
         }
         if (updateCompilationRequest.hasEvents()) {
-            compilation.setEvents(events);
+            compilation.setEvents(new ArrayList<>(events));
         }
     }
 
