@@ -26,12 +26,6 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
 
-//    @Override
-//    public CategoryDto createOrUpdate(CategoryDto categoryDto) {
-//        Category category = categoryRepository.save(CategoryMapper.toCategory(categoryDto));
-//        return CategoryMapper.toCategoryDto(category);
-//    }
-
     @Override
     public void delete(Long id) {
         if (!categoryRepository.existsById(id)) {
@@ -62,16 +56,6 @@ public class CategoryServiceImpl implements CategoryService {
 
         return CategoryMapper.toCategoryDto(category);
     }
-
-//    @Override
-//    public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
-//        if (categoryRepository.existsByName(newCategoryDto.getName())) {
-//            throw new ConflictException("Category with name '" + newCategoryDto.getName() + "' already exists");
-//        }
-//        Category category = CategoryMapper.toCategory(newCategoryDto);
-//        Category newCategory = categoryRepository.save(category);
-//        return CategoryMapper.toCategoryDto(newCategory);
-//    }
 
     @Override
     @Transactional

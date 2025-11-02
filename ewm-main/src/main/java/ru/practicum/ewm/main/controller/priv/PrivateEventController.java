@@ -29,7 +29,6 @@ public class PrivateEventController {
         return eventService.getEvents(userId, from, size);
     }
 
-    //    POST /users/{userId}/events Добавление нового события
     @PostMapping("/{userId}/events")
     @ResponseStatus(HttpStatus.CREATED)
     public EventFullDto createEvent(@PathVariable Long userId,
@@ -37,14 +36,12 @@ public class PrivateEventController {
         return eventService.createEvent(userId, newEventDto);
     }
 
-    //    GET /users/{userId}/events/{eventId} Получение полной информации о событии добавленном текущим пользователем
     @GetMapping("/{userId}/events/{eventId}")
     public EventFullDto getEvent(@PathVariable Long userId,
                                  @PathVariable Long eventId) {
         return eventService.getEventByUser(userId, eventId);
     }
 
-    //    PATCH /users/{userId}/events/{eventId} Изменение события добавленного текущим пользователем
     @PatchMapping("/{userId}/events/{eventId}")
     public EventFullDto updateEventByUser(@PathVariable Long userId,
                                           @PathVariable Long eventId,
@@ -52,14 +49,12 @@ public class PrivateEventController {
         return eventService.updateEventByUser(userId, eventId, updateEventUserDto);
     }
 
-//        GET /users/{userId}/events/{eventId}/requests Получение информации о запросах на участие в событии текущего пользователя
     @GetMapping("/{userId}/events/{eventId}/requests")
     public List<ParticipationRequestDto> getUserRequestsByEventId(@PathVariable Long userId,
                                                                   @PathVariable Long eventId) {
         return participationRequestService.getUserRequestsByEventId(userId, eventId);
     }
 
-    //    PATCH /users/{userId}/events/{eventId}/requests Изменение статуса (подтверждена, отменена) заявок на участие в событии текущего пользователя
     @PatchMapping("/{userId}/events/{eventId}/requests")
     public UpdateParticipationRequestListDto updateUserRequestsByEventId(
             @PathVariable Long userId,

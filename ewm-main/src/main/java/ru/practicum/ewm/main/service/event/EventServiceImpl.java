@@ -50,7 +50,6 @@ public class EventServiceImpl implements EventService {
 
     private final Map<String, Set<Long>> viewCache = new ConcurrentHashMap<>();
 
-    // POST /users/{userId}/events
     @Override
     @Transactional
     public EventFullDto createEvent(Long userId, NewEventDto newEventDto) {
@@ -76,7 +75,6 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(savedEvent);
     }
 
-    // GET /users/{userId}/events
     @Override
     public List<EventShortDto> getEvents(Long userId, int from, int size) {
         if (!userRepository.existsById(userId)) {
@@ -100,7 +98,6 @@ public class EventServiceImpl implements EventService {
                 .toList();
     }
 
-    // PATCH /users/{userId}/events/{eventId}
     @Override
     @Transactional
     public EventFullDto updateEventByUser(Long userId, Long eventId, UpdateEventUserDto updateEventUserDto) {
@@ -132,7 +129,6 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(updatedEvent);
     }
 
-    // GET /users/{userId}/events/{eventId}
     @Override
     public EventFullDto getEventByUser(Long userId, Long eventId) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
@@ -144,7 +140,6 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(event);
     }
 
-    // PATCH /admin/events/{eventId}
     @Override
     @Transactional
     public EventFullDto updateEvent(Long eventId, UpdateEventAdminDto updateEventAdminDto) {
@@ -186,7 +181,6 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(updatedEvent);
     }
 
-    // GET /events/{id}
     @Override
     @Transactional
     public EventFullDto getEvent(Long eventId, HttpServletRequest request) {
@@ -214,7 +208,6 @@ public class EventServiceImpl implements EventService {
         return EventMapper.toEventFullDto(event);
     }
 
-    // GET /admin/events
     @Override
     @Transactional(readOnly = true)
     public List<EventFullDto> getEventsWithParamsByAdmin(AdminEventSearchRequest request) {
@@ -251,7 +244,6 @@ public class EventServiceImpl implements EventService {
                 .collect(Collectors.toList());
     }
 
-    // GET /events
     @Override
     public List<EventFullDto> getEventsWithParamsByUser(PublicEventSearchRequest request,
                                                         HttpServletRequest httpRequest) {
