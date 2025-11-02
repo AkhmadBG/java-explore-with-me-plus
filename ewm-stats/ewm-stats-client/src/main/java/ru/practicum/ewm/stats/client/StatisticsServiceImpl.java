@@ -1,7 +1,10 @@
 package ru.practicum.ewm.stats.client;
 
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.RestTemplate;
+import ru.practicum.ewm.stats.dto.CreateHitDto;
 import ru.practicum.ewm.stats.dto.ViewStats;
 
 import java.time.LocalDateTime;
@@ -13,8 +16,12 @@ import java.util.stream.Collectors;
 
 import static ru.practicum.ewm.stats.dto.util.DateFormatter.format;
 
-@Service
+@Slf4j
+@RequiredArgsConstructor
 public class StatisticsServiceImpl implements StatisticsService {
+
+    private final RestTemplate restTemplate;
+    private final String statsServerUrl;
 
     @Override
     public List<ViewStats> getStats(String start, String end, List<String> uris) {
@@ -23,7 +30,15 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     @Override
     public void sendStats(List<Long> eventIds, HttpServletRequest request) {
+        CreateHitDto hit = CreateHitDto.builder()
+                .app("ewm-main")
+                .uri(request.getRequestURI())
+                .ip(request.getRemoteAddr())
+                .timestamp(LocalDateTime.now())
+                .build();
 
+        String url = statsServerUrl + "/hit";
+        restTemplate.postForEntity(url, hit, Void.class);
     }
 
     @Override
