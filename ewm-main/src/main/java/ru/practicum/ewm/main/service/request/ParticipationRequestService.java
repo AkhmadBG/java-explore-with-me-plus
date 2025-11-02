@@ -1,5 +1,6 @@
 package ru.practicum.ewm.main.service.request;
 
+import ru.practicum.ewm.main.dto.event.UpdateParticipationRequestListDto;
 import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.main.dto.request.UpdateParticipationRequestDto;
 import ru.practicum.ewm.main.entity.ParticipationRequest;
@@ -15,5 +16,5 @@ public interface ParticipationRequestService {
 
     List<ParticipationRequestDto> getUserRequestsByEventId(Long userId, Long eventId);
 
-    List<ParticipationRequestDto> updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateParticipationRequestDto);
+    UpdateParticipationRequestListDto updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateParticipationRequestDto);
 }

@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.main.dto.event.EventFullDto;
-import ru.practicum.ewm.main.dto.event.EventShortDto;
-import ru.practicum.ewm.main.dto.event.NewEventDto;
-import ru.practicum.ewm.main.dto.event.UpdateEventUserDto;
+import ru.practicum.ewm.main.dto.event.*;
 import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.main.dto.request.UpdateParticipationRequestDto;
 import ru.practicum.ewm.main.service.event.EventService;
@@ -64,7 +61,7 @@ public class PrivateEventController {
 
     //    PATCH /users/{userId}/events/{eventId}/requests Изменение статуса (подтверждена, отменена) заявок на участие в событии текущего пользователя
     @PatchMapping("/{userId}/events/{eventId}/requests")
-    public List<ParticipationRequestDto> updateUserRequestsByEventId(
+    public UpdateParticipationRequestListDto updateUserRequestsByEventId(
             @PathVariable Long userId,
             @PathVariable Long eventId,
             @Valid @RequestBody UpdateParticipationRequestDto updateParticipationRequestDto) {

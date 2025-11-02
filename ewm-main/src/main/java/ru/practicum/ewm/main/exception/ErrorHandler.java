@@ -54,7 +54,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.CONFLICT,
                 "Integrity constraint has been violated.",
-                "Database constraint violation",
+                e.getMessage(),
                 getStackTrace(e)
         );
     }
@@ -183,7 +183,7 @@ public class ErrorHandler {
         return new ApiError(
                 HttpStatus.CONFLICT,
                 "Incorrectly made request.",
-                "Required request body is missing",
+                e.getMessage(),
                 getStackTrace(e)
         );
     }

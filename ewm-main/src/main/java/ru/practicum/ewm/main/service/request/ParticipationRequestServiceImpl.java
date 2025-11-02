@@ -4,6 +4,7 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import ru.practicum.ewm.main.dto.event.UpdateParticipationRequestListDto;
 import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.main.dto.request.UpdateParticipationRequestDto;
 import ru.practicum.ewm.main.entity.Event;
@@ -105,7 +106,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
     @Override
     @Transactional
-    public List<ParticipationRequestDto> updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateDto) {
+    public UpdateParticipationRequestListDto updateUserRequestsByEventId(Long userId, Long eventId, UpdateParticipationRequestDto updateDto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new NotFoundException("Event with id=" + eventId + " was not found"));
 
@@ -164,9 +165,17 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         updateEventConfirmedRequests(event);
 
-        return updatedRequests.stream()
-                .map(ParticipationRequestMapper::toDto)
-                .collect(Collectors.toList());
+        UpdateParticipationRequestListDto updateParticipationRequestListDto = new UpdateParticipationRequestListDto();
+
+        for (ParticipationRequest request : updatedRequests) {
+            if (request.getStatus() == RequestStatus.CONFIRMED) {
+                updateParticipationRequestListDto.getConfirmedRequests().add(ParticipationRequestMapper.toDto(request));
+            }  else {
+                updateParticipationRequestListDto.getRejectedRequests().add(ParticipationRequestMapper.toDto(request));
+            }
+        }
+
+        return updateParticipationRequestListDto;
     }
 
     private void updateEventConfirmedRequests(Event event) {
