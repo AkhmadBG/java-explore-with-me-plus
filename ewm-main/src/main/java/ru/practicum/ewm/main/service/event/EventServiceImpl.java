@@ -65,7 +65,7 @@ public class EventServiceImpl implements EventService {
             throw new WrongTimeException("Event date must be at least 2 hours from now" + eventDate);
         }
 
-        Location location = new Location();
+        LocationDto location = new LocationDto();
         location.setLat(newEventDto.getLocation().getLat());
         location.setLon(newEventDto.getLocation().getLon());
 

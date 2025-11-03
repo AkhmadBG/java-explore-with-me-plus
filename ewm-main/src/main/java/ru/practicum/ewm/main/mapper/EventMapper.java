@@ -2,6 +2,7 @@ package ru.practicum.ewm.main.mapper;
 
 import ru.practicum.ewm.main.dto.event.EventFullDto;
 import ru.practicum.ewm.main.dto.event.EventShortDto;
+import ru.practicum.ewm.main.dto.event.LocationDto;
 import ru.practicum.ewm.main.dto.event.NewEventDto;
 import ru.practicum.ewm.main.entity.Category;
 import ru.practicum.ewm.main.entity.Event;
@@ -15,7 +16,7 @@ import static ru.practicum.ewm.main.util.DateFormatter.format;
 import static ru.practicum.ewm.main.util.DateFormatter.parse;
 
 public class EventMapper {
-    public static Event toEvent(NewEventDto newEventDto, Category category, User initiator, Location location) {
+    public static Event toEvent(NewEventDto newEventDto, Category category, User initiator, LocationDto location) {
         return Event.builder()
                 .annotation(newEventDto.getAnnotation())
                 .category(category)
@@ -23,7 +24,7 @@ public class EventMapper {
                 .eventDate(parse(newEventDto.getEventDate()))
                 .createdOn(LocalDateTime.now())
                 .initiator(initiator)
-                .location(location)
+                .location(LocationMapper.toLocation(location))
                 .paid(newEventDto.getPaid() != null ? newEventDto.getPaid() : false)
                 .participantLimit(newEventDto.getParticipantLimit() != null ?
                         newEventDto.getParticipantLimit() : 0)
@@ -46,7 +47,7 @@ public class EventMapper {
                 .eventDate(format(event.getEventDate()))
                 .createdOn(format(event.getCreatedOn()))
                 .initiator(UserMapper.toUserShortDto(event.getInitiator()))
-                .location(event.getLocation())
+                .location(LocationMapper.locationToDto(event.getLocation()))
                 .paid(event.getPaid())
                 .participantLimit(event.getParticipantLimit())
                 .publishedOn(format(event.getPublishedOn()))

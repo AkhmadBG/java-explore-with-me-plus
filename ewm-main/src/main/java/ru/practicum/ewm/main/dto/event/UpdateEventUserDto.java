@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.ewm.main.entity.Location;
 import ru.practicum.ewm.main.enums.UserStateAction;
 
 @Getter
@@ -25,7 +24,7 @@ public class UpdateEventUserDto {
 
     private String eventDate;
 
-    private Location location;
+    private LocationDto location;
 
     private Boolean paid;
 

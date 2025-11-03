@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.ewm.main.entity.Location;
 import ru.practicum.ewm.main.enums.AdminStateAction;
 
 @Getter
@@ -22,7 +21,7 @@ public class UpdateEventAdminDto {
     @Size(min = 20, max = 7000)
     private String description;
     private String eventDate;
-    private Location location;
+    private LocationDto location;
     private Boolean paid;
 
     @Positive

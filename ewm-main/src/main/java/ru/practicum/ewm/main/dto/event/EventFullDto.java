@@ -6,7 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 import ru.practicum.ewm.main.dto.user.UserShortDto;
-import ru.practicum.ewm.main.entity.Location;
 
 import static ru.practicum.ewm.main.util.DateFormatter.PATTERN;
 
@@ -27,6 +26,7 @@ public class EventFullDto {
 
 
     private Long confirmedRequests;
+
     private String description;
 
     @NotBlank
@@ -41,7 +41,7 @@ public class EventFullDto {
     private UserShortDto initiator;
 
     @NotNull
-    private Location location;
+    private LocationDto location;
 
     @NotNull
     private Boolean paid;
