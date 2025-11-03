@@ -6,7 +6,6 @@ import ru.practicum.ewm.main.dto.event.LocationDto;
 import ru.practicum.ewm.main.dto.event.NewEventDto;
 import ru.practicum.ewm.main.entity.Category;
 import ru.practicum.ewm.main.entity.Event;
-import ru.practicum.ewm.main.entity.Location;
 import ru.practicum.ewm.main.entity.User;
 import ru.practicum.ewm.main.enums.EventState;
 
