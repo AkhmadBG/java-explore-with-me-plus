@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="EwmStatsServiceAppTest" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+    <option name="ACTIVE_PROFILES" value="test" />
+    <module name="ewm-stats-service" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="ru.practicum.ewm.stats.service.EwmStatsServiceApp" />
+    <option name="VM_PARAMETERS" value="-Dspring.profiles.active=test" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

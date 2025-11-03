@@ -23,4 +23,5 @@ public class HitMapper {
                 .timestamp(hit.getTimestamp())
                 .build();
     }
+
 }

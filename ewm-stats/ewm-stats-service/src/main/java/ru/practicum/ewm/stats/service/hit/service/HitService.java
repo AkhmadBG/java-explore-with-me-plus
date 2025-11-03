@@ -11,4 +11,5 @@ public interface HitService {
     HitDto create(CreateHitDto hit);
 
     List<ViewStats> getStats(GetStatsDto getStatsDto);
+
 }

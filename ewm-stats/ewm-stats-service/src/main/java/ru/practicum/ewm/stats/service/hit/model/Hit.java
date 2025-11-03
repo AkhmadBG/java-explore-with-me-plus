@@ -28,7 +28,7 @@ public class Hit {
     @Column(nullable = false)
     private String ip;
 
-    @Column(nullable = false)
+    @Column(name = "timestamp", nullable = false)
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime timestamp;
 
