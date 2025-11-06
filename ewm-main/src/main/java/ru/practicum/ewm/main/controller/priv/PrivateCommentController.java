@@ -1,42 +1,30 @@
 package ru.practicum.ewm.main.controller.priv;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
-import ru.practicum.ewm.main.mapper.ParticipationRequestMapper;
-import ru.practicum.ewm.main.service.request.ParticipationRequestService;
-
-import java.util.List;
+import ru.practicum.ewm.main.dto.comment.CommentDto;
+import ru.practicum.ewm.main.dto.comment.CreateCommentDto;
+import ru.practicum.ewm.main.service.comment.CommentService;
 
 @RestController
-@RequestMapping("/users/{userId}/requests")
 @RequiredArgsConstructor
 @Validated
 public class PrivateCommentController {
+    private final CommentService commentService;
 
-    private final ParticipationRequestService service;
-
-    @GetMapping
-    public List<ParticipationRequestDto> getRequests(@PathVariable("userId") @NotNull @Positive Long userId) {
-        return service.getUserRequests(userId).stream()
-                .map(ParticipationRequestMapper::toDto)
-                .toList();
+    @PostMapping("/{userId}/events/{eventId}/comments")
+    public CommentDto create(Long userId, Long eventId, CreateCommentDto createCommentDto) {
+        return commentService.create(eventId, userId, createCommentDto);
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public ParticipationRequestDto addRequest(@PathVariable("userId") @NotNull @Positive Long userId,
-                                              @RequestParam("eventId") @NotNull @Positive Long eventId) {
-        return ParticipationRequestMapper.toDto(service.addRequest(userId, eventId));
+    @PatchMapping("/{userId}/comments/{commentId}")
+    public CommentDto update(Long userId, Long commentId, CreateCommentDto createCommentDto) {
+        return commentService.update(userId, commentId, createCommentDto);
     }
 
-    @PatchMapping("/{requestId}/cancel")
-    public ParticipationRequestDto cancelRequest(@PathVariable("userId") @NotNull @Positive Long userId,
-                                                 @PathVariable("requestId") @NotNull @Positive Long requestId) {
-        return ParticipationRequestMapper.toDto(service.cancelRequest(userId, requestId));
+    @DeleteMapping("/{userId}/comments/{commentId}")
+    public void delete(Long userId, Long commentId) {
+        commentService.delete(userId, commentId);
     }
 }

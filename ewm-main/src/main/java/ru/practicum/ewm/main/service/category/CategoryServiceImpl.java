@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 import ru.practicum.ewm.main.dto.category.NewCategoryDto;
 import ru.practicum.ewm.main.dto.category.UpdateCategoryDto;
+import ru.practicum.ewm.main.exception.CategoryNotExistException;
 import ru.practicum.ewm.main.exception.ConflictException;
-import ru.practicum.ewm.main.exception.NotFoundException;
 import ru.practicum.ewm.main.mapper.CategoryMapper;
 import ru.practicum.ewm.main.entity.Category;
 import ru.practicum.ewm.main.repository.CategoryRepository;
@@ -29,7 +29,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void delete(Long id) {
         if (!categoryRepository.existsById(id)) {
-            throw new NotFoundException("Category with id=" + id + " was not found");
+            throw new CategoryNotExistException("Category with id=" + id + " was not found");
         }
 
         if (eventRepository.existsByCategoryId(id)) {
@@ -52,7 +52,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto getById(Long id) {
         Category category = categoryRepository.findById(id).orElseThrow(() ->
-                new NotFoundException("Category with id=" + id + " was not found"));
+                new CategoryNotExistException("Category with id=" + id + " was not found"));
 
         return CategoryMapper.toCategoryDto(category);
     }
@@ -78,7 +78,7 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoryDto updateCategory(Long id, UpdateCategoryDto updateCategoryDto) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Category with id=" + id + " was not found"));
+                .orElseThrow(() -> new CategoryNotExistException("Category with id=" + id + " was not found"));
 
         if (updateCategoryDto.getName() != null &&
                 !updateCategoryDto.getName().equals(category.getName())) {
