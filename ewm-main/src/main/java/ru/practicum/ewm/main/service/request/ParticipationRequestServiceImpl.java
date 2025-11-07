@@ -30,6 +30,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final ParticipationRequestRepository requestRepository;
+    private final ParticipationRequestMapper participationRequestMapper;
 
     @Transactional
     public List<ParticipationRequest> getUserRequests(Long userId) {
@@ -100,7 +101,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         List<ParticipationRequest> requests = requestRepository.findByEventId(eventId);
 
         return requests.stream()
-                .map(ParticipationRequestMapper::toDto)
+                .map(participationRequestMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -169,9 +170,9 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
 
         for (ParticipationRequest request : updatedRequests) {
             if (request.getStatus() == RequestStatus.CONFIRMED) {
-                updateParticipationRequestListDto.getConfirmedRequests().add(ParticipationRequestMapper.toDto(request));
+                updateParticipationRequestListDto.getConfirmedRequests().add(participationRequestMapper.toDto(request));
             }  else {
-                updateParticipationRequestListDto.getRejectedRequests().add(ParticipationRequestMapper.toDto(request));
+                updateParticipationRequestListDto.getRejectedRequests().add(participationRequestMapper.toDto(request));
             }
         }
 
