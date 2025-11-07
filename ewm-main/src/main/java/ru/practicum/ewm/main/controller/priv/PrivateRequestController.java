@@ -19,11 +19,12 @@ import java.util.List;
 public class PrivateRequestController {
 
     private final ParticipationRequestService service;
+    private final ParticipationRequestMapper participationRequestMapper;
 
     @GetMapping
     public List<ParticipationRequestDto> getRequests(@PathVariable("userId") @NotNull @Positive Long userId) {
         return service.getUserRequests(userId).stream()
-                .map(ParticipationRequestMapper::toDto)
+                .map(participationRequestMapper::toDto)
                 .toList();
     }
 
@@ -31,12 +32,12 @@ public class PrivateRequestController {
     @ResponseStatus(HttpStatus.CREATED)
     public ParticipationRequestDto addRequest(@PathVariable("userId") @NotNull @Positive Long userId,
                                               @RequestParam("eventId") @NotNull @Positive Long eventId) {
-        return ParticipationRequestMapper.toDto(service.addRequest(userId, eventId));
+        return participationRequestMapper.toDto(service.addRequest(userId, eventId));
     }
 
     @PatchMapping("/{requestId}/cancel")
     public ParticipationRequestDto cancelRequest(@PathVariable("userId") @NotNull @Positive Long userId,
                                                  @PathVariable("requestId") @NotNull @Positive Long requestId) {
-        return ParticipationRequestMapper.toDto(service.cancelRequest(userId, requestId));
+        return participationRequestMapper.toDto(service.cancelRequest(userId, requestId));
     }
 }
