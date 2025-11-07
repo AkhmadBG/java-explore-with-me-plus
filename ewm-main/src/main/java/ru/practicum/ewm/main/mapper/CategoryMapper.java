@@ -1,32 +1,20 @@
 package ru.practicum.ewm.main.mapper;
 
+import org.mapstruct.*;
 import ru.practicum.ewm.main.dto.category.CategoryDto;
 import ru.practicum.ewm.main.dto.category.NewCategoryDto;
 import ru.practicum.ewm.main.dto.category.UpdateCategoryDto;
 import ru.practicum.ewm.main.entity.Category;
 
-public class CategoryMapper {
-    public static CategoryDto toCategoryDto(Category category) {
-        return CategoryDto.builder()
-                .id(category.getId())
-                .name(category.getName())
-                .build();
-    }
+@Mapper(componentModel = "spring")
+public interface CategoryMapper {
 
-    public static Category toCategory(CategoryDto categoryDto) {
-        return Category.builder()
-                .name(categoryDto.getName())
-                .build();
-    }
+    CategoryDto toCategoryDto(Category category);
 
-    public static Category toCategory(NewCategoryDto newCategoryDto) {
-        return Category.builder()
-                .name(newCategoryDto.getName())
-                .build();
-    }
+    Category toEntity(CategoryDto categoryDto);
 
-    public static void updateCategory(Category category, UpdateCategoryDto updateCategoryDto) {
-        category.setName(updateCategoryDto.getName());
-    }
+    Category toCategory(NewCategoryDto newCategoryDto);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    void updateCategory(UpdateCategoryDto updateCategoryDto, @MappingTarget Category category);
 }

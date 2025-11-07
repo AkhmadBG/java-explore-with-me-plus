@@ -1,24 +1,15 @@
 package ru.practicum.ewm.main.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.ewm.main.dto.event.LocationDto;
 import ru.practicum.ewm.main.entity.Location;
 
-public class LocationMapper {
+@Mapper(componentModel = "spring")
+public interface LocationMapper {
 
-    public static LocationDto locationToDto(Location location) {
-        return LocationDto.builder()
-                .id(location.getId())
-                .lat(location.getLat())
-                .lon(location.getLon())
-                .build();
-    }
+    LocationDto toDto(Location location);
 
-    public static Location toLocation(LocationDto locationDto) {
-        return Location.builder()
-                .id(locationDto.getId())
-                .lat(locationDto.getLat())
-                .lon(locationDto.getLon())
-                .build();
-    }
-
+    @Mapping(target = "id", source = "id")
+    Location toEntity(LocationDto locationDto);
 }

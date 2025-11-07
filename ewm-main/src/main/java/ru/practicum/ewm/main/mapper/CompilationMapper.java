@@ -1,52 +1,27 @@
 package ru.practicum.ewm.main.mapper;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.*;
 import ru.practicum.ewm.main.dto.compilation.CompilationDto;
 import ru.practicum.ewm.main.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.main.dto.compilation.UpdateCompilationRequest;
-import ru.practicum.ewm.main.dto.event.EventFullDto;
 import ru.practicum.ewm.main.entity.Compilation;
 import ru.practicum.ewm.main.entity.Event;
 
-import java.util.ArrayList;
 import java.util.List;
 
-@Component
-public class CompilationMapper {
+@Mapper(componentModel = "spring", uses = EventMapper.class)
+public interface CompilationMapper {
 
-    public CompilationDto toCompilationDto(Compilation compilation) {
-        List<EventFullDto> events = compilation.getEvents().stream()
-                .map(EventMapper::toEventFullDto)
-                .toList();
-        return CompilationDto.builder()
-                .id(compilation.getId())
-                .title(compilation.getTitle())
-                .pinned(compilation.getPinned())
-                .events(events)
-                .build();
-    }
+    CompilationDto toCompilationDto(Compilation compilation);
 
-    public Compilation toCompilation(NewCompilationDto newCompilationDto,
-                                            List<Event> events) {
-        return Compilation.builder()
-                .title(newCompilationDto.getTitle())
-                .pinned(newCompilationDto.getPinned())
-                .events(events)
-                .build();
-    }
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "title", source = "newCompilationDto.title")
+    @Mapping(target = "pinned", source = "newCompilationDto.pinned")
+    @Mapping(target = "events", source = "events")
+    Compilation toCompilation(NewCompilationDto newCompilationDto, List<Event> events);
 
-    public void updateCompilation(Compilation compilation,
-                                                UpdateCompilationRequest updateCompilationRequest,
-                                                List<Event> events) {
-        if (updateCompilationRequest.hasTitle()) {
-            compilation.setTitle(updateCompilationRequest.getTitle());
-        }
-        if (updateCompilationRequest.hasPinned()) {
-            compilation.setPinned(updateCompilationRequest.getPinned());
-        }
-        if (updateCompilationRequest.hasEvents()) {
-            compilation.setEvents(new ArrayList<>(events));
-        }
-    }
-
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
+    @Mapping(target = "events", ignore = true)
+    void updateCompilationFields(UpdateCompilationRequest updateCompilationRequest,
+                                 @MappingTarget Compilation compilation);
 }

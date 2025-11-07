@@ -25,6 +25,7 @@ import java.util.List;
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
     private final EventRepository eventRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public void delete(Long id) {
@@ -45,7 +46,7 @@ public class CategoryServiceImpl implements CategoryService {
         Page<Category> categories = categoryRepository.findAll(pageable);
         return categories.getContent()
                 .stream()
-                .map(CategoryMapper::toCategoryDto)
+                .map(categoryMapper::toCategoryDto)
                 .toList();
     }
 
@@ -54,18 +55,18 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryRepository.findById(id).orElseThrow(() ->
                 new CategoryNotExistException("Category with id=" + id + " was not found"));
 
-        return CategoryMapper.toCategoryDto(category);
+        return categoryMapper.toCategoryDto(category);
     }
 
     @Override
     @Transactional
     public CategoryDto addCategory(NewCategoryDto newCategoryDto) {
         try {
-            Category category = CategoryMapper.toCategory(newCategoryDto);
+            Category category = categoryMapper.toCategory(newCategoryDto);
 
             Category newCategory = categoryRepository.saveAndFlush(category);
 
-            return CategoryMapper.toCategoryDto(newCategory);
+            return categoryMapper.toCategoryDto(newCategory);
 
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(
@@ -89,8 +90,8 @@ public class CategoryServiceImpl implements CategoryService {
             }
         }
 
-        CategoryMapper.updateCategory(category, updateCategoryDto);
+        categoryMapper.updateCategory(updateCategoryDto, category);
         Category updateCategory = categoryRepository.save(category);
-        return CategoryMapper.toCategoryDto(updateCategory);
+        return categoryMapper.toCategoryDto(updateCategory);
     }
 }
