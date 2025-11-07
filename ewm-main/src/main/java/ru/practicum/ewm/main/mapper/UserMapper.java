@@ -1,31 +1,17 @@
 package ru.practicum.ewm.main.mapper;
 
+import org.mapstruct.Mapper;
 import ru.practicum.ewm.main.dto.user.NewUserRequest;
 import ru.practicum.ewm.main.dto.user.UserDto;
 import ru.practicum.ewm.main.dto.user.UserShortDto;
 import ru.practicum.ewm.main.entity.User;
 
-public class UserMapper {
+@Mapper(componentModel = "spring")
+public interface UserMapper {
 
-    public static UserDto toDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .build();
-    }
+    UserDto toDto(User user);
 
-    public static User toEntity(NewUserRequest dto) {
-        return User.builder()
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .build();
-    }
+    User toEntity(NewUserRequest dto);
 
-    public static UserShortDto toUserShortDto(User user) {
-        return UserShortDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .build();
-    }
+    UserShortDto toUserShortDto(User user);
 }

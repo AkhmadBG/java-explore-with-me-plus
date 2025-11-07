@@ -1,8 +1,8 @@
 package ru.practicum.ewm.main.mapper;
 
+import org.mapstruct.*;
 import ru.practicum.ewm.main.dto.event.EventFullDto;
 import ru.practicum.ewm.main.dto.event.EventShortDto;
-import ru.practicum.ewm.main.dto.event.LocationDto;
 import ru.practicum.ewm.main.dto.event.NewEventDto;
 import ru.practicum.ewm.main.entity.Category;
 import ru.practicum.ewm.main.entity.Event;
@@ -11,63 +11,54 @@ import ru.practicum.ewm.main.enums.EventState;
 
 import java.time.LocalDateTime;
 
-import static ru.practicum.ewm.main.util.DateFormatter.format;
-import static ru.practicum.ewm.main.util.DateFormatter.parse;
+import ru.practicum.ewm.main.util.DateFormatter;
 
-public class EventMapper {
-    public static Event toEvent(NewEventDto newEventDto, Category category, User initiator, LocationDto location) {
-        return Event.builder()
-                .annotation(newEventDto.getAnnotation())
-                .category(category)
-                .description(newEventDto.getDescription())
-                .eventDate(parse(newEventDto.getEventDate()))
-                .createdOn(LocalDateTime.now())
-                .initiator(initiator)
-                .location(LocationMapper.toLocation(location))
-                .paid(newEventDto.getPaid() != null ? newEventDto.getPaid() : false)
-                .participantLimit(newEventDto.getParticipantLimit() != null ?
-                        newEventDto.getParticipantLimit() : 0)
-                .requestModeration(newEventDto.getRequestModeration() != null ?
-                        newEventDto.getRequestModeration() : true)
-                .title(newEventDto.getTitle())
-                .state(EventState.PENDING)
-                .confirmedRequests(0L)
-                .views(0L)
-                .build();
+@Mapper(componentModel = "spring",
+        uses = {CategoryMapper.class, UserMapper.class, LocationMapper.class},
+        imports = {LocalDateTime.class, EventState.class})
+public interface EventMapper {
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdOn", expression = "java(LocalDateTime.now())")
+    @Mapping(target = "state", constant = "PENDING")
+    @Mapping(target = "confirmedRequests", constant = "0L")
+    @Mapping(target = "views", constant = "0L")
+    @Mapping(target = "paid", source = "newEventDto.paid", defaultExpression = "java(false)")
+    @Mapping(target = "participantLimit", source = "newEventDto.participantLimit", defaultExpression = "java(0)")
+    @Mapping(target = "requestModeration", source = "newEventDto.requestModeration", defaultExpression = "java(true)")
+    @Mapping(target = "eventDate", expression = "java(parseDate(newEventDto.getEventDate()))")
+    @Mapping(target = "location", source = "location")
+    @Mapping(target = "category", source = "category")
+    Event toEvent(NewEventDto newEventDto, Category category, User initiator,
+                  ru.practicum.ewm.main.dto.event.LocationDto location);
+
+    @Mapping(target = "eventDate", expression = "java(formatDate(event.getEventDate()))")
+    @Mapping(target = "createdOn", expression = "java(formatDate(event.getCreatedOn()))")
+    @Mapping(target = "publishedOn", expression = "java(formatDate(event.getPublishedOn()))")
+    @Mapping(target = "state", expression = "java(event.getState().name())")
+    EventFullDto toEventFullDto(Event event);
+
+    @Mapping(target = "eventDate", expression = "java(formatDate(event.getEventDate()))")
+    EventShortDto toEventShortDto(Event event);
+
+    default String formatDate(LocalDateTime dateTime) {
+        return DateFormatter.format(dateTime);
     }
 
-    public static EventFullDto toEventFullDto(Event event) {
-        return EventFullDto.builder()
-                .id(event.getId())
-                .annotation(event.getAnnotation())
-                .category(CategoryMapper.toCategoryDto(event.getCategory()))
-                .confirmedRequests(event.getConfirmedRequests())
-                .description(event.getDescription())
-                .eventDate(format(event.getEventDate()))
-                .createdOn(format(event.getCreatedOn()))
-                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
-                .location(LocationMapper.locationToDto(event.getLocation()))
-                .paid(event.getPaid())
-                .participantLimit(event.getParticipantLimit())
-                .publishedOn(format(event.getPublishedOn()))
-                .requestModeration(event.getRequestModeration())
-                .state(event.getState().name())
-                .title(event.getTitle())
-                .views(event.getViews())
-                .build();
+    default LocalDateTime parseDate(String dateString) {
+        return DateFormatter.parse(dateString);
     }
 
-    public static EventShortDto toEventShortDto(Event event) {
-        return EventShortDto.builder()
-                .id(event.getId())
-                .annotation(event.getAnnotation())
-                .category(CategoryMapper.toCategoryDto(event.getCategory()))
-                .confirmedRequests(event.getConfirmedRequests())
-                .eventDate(format(event.getEventDate()))
-                .initiator(UserMapper.toUserShortDto(event.getInitiator()))
-                .paid(event.getPaid())
-                .title(event.getTitle())
-                .views(event.getViews())
-                .build();
+    @AfterMapping
+    default void setDefaultValues(@MappingTarget Event.EventBuilder eventBuilder, NewEventDto newEventDto) {
+        if (newEventDto.getPaid() == null) {
+            eventBuilder.paid(false);
+        }
+        if (newEventDto.getParticipantLimit() == null) {
+            eventBuilder.participantLimit(0);
+        }
+        if (newEventDto.getRequestModeration() == null) {
+            eventBuilder.requestModeration(true);
+        }
     }
 }

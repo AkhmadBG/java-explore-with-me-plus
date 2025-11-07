@@ -9,7 +9,7 @@ import ru.practicum.ewm.main.dto.user.NewUserRequest;
 import ru.practicum.ewm.main.dto.user.UserDto;
 import ru.practicum.ewm.main.entity.User;
 import ru.practicum.ewm.main.exception.ConflictException;
-import ru.practicum.ewm.main.exception.NotFoundException;
+import ru.practicum.ewm.main.exception.UserNotExistException;
 import ru.practicum.ewm.main.mapper.UserMapper;
 import ru.practicum.ewm.main.repository.UserRepository;
 
@@ -20,6 +20,7 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
+    private final UserMapper userMapper;
 
     @Override
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
@@ -36,7 +37,7 @@ public class UserServiceImpl implements UserService {
                     .toList();
         }
         return users.stream()
-                .map(UserMapper::toDto)
+                .map(userMapper::toDto)
                 .toList();
     }
 
@@ -47,14 +48,14 @@ public class UserServiceImpl implements UserService {
             throw new ConflictException("User with email=%s already exists.".formatted(email));
         }
 
-        User user = UserMapper.toEntity(newUser);
-        return UserMapper.toDto(repository.save(user));
+        User user = userMapper.toEntity(newUser);
+        return userMapper.toDto(repository.save(user));
     }
 
     @Override
     public void deleteUser(Long userId) {
         if (!repository.existsById(userId)) {
-            throw new NotFoundException("User with id=%d not found.".formatted(userId));
+            throw new UserNotExistException("User with id=%d not found.".formatted(userId));
         }
 
         repository.deleteById(userId);
