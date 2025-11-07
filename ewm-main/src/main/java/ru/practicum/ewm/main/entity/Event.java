@@ -5,6 +5,7 @@ import lombok.*;
 import ru.practicum.ewm.main.enums.EventState;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Builder
 @Getter
@@ -73,4 +74,7 @@ public class Event {
     @Column(name = "views")
     @Builder.Default
     private Long views = 0L;
+
+    @OneToMany(mappedBy = "event", fetch = FetchType.LAZY)
+    private List<Comment> comments;
 }

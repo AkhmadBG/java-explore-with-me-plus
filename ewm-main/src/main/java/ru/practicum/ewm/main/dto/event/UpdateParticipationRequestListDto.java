@@ -13,8 +13,10 @@ import java.util.List;
 @AllArgsConstructor
 public class UpdateParticipationRequestListDto {
 
+    @Builder.Default
     private List<ParticipationRequestDto> confirmedRequests = new ArrayList<>();
 
+    @Builder.Default
     private List<ParticipationRequestDto> rejectedRequests =  new ArrayList<>();
 
 }

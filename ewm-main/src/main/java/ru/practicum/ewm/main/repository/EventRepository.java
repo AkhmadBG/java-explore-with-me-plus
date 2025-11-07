@@ -3,6 +3,8 @@ package ru.practicum.ewm.main.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.practicum.ewm.main.entity.Event;
 
@@ -21,4 +23,14 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     Boolean existsByCategoryId(Long categoryId);
 
     Optional<Event> findByIdAndPublishedOnIsNotNull(Long id);
+
+    @Query("""
+                SELECT e FROM Event e
+                LEFT JOIN FETCH e.comments c
+                GROUP BY e
+                ORDER BY COUNT(c) DESC
+                LIMIT :count
+            """)
+    List<Event> getTopByComments(@Param("count") int count);
+
 }

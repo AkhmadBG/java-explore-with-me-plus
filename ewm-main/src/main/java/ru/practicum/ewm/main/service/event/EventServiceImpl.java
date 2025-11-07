@@ -493,4 +493,12 @@ public class EventServiceImpl implements EventService {
     private String getClientIp(HttpServletRequest request) {
         return request.getRemoteAddr();
     }
+
+    @Override
+    public List<EventFullDto> getTopEvent(int count) {
+        List<Event> topEvents = eventRepository.getTopByComments(count);
+        return topEvents.stream()
+                .map(EventMapper::toEventFullDto)
+                .collect(Collectors.toList());
+    }
 }

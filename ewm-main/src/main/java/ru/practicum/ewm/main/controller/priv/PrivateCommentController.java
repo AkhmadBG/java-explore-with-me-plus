@@ -14,17 +14,23 @@ public class PrivateCommentController {
     private final CommentService commentService;
 
     @PostMapping("/{userId}/events/{eventId}/comments")
-    public CommentDto create(Long userId, Long eventId, CreateCommentDto createCommentDto) {
+    public CommentDto create(@PathVariable(name = "userId") Long userId,
+                             @PathVariable(name = "eventId") Long eventId,
+                             @RequestBody CreateCommentDto createCommentDto) {
         return commentService.create(eventId, userId, createCommentDto);
     }
 
     @PatchMapping("/{userId}/comments/{commentId}")
-    public CommentDto update(Long userId, Long commentId, CreateCommentDto createCommentDto) {
+    public CommentDto update(@PathVariable(name = "userId") Long userId,
+                             @PathVariable(name = "commentId") Long commentId,
+                             @RequestBody CreateCommentDto createCommentDto) {
         return commentService.update(userId, commentId, createCommentDto);
     }
 
     @DeleteMapping("/{userId}/comments/{commentId}")
-    public void delete(Long userId, Long commentId) {
+    public void delete(@PathVariable(name = "userId") Long userId,
+                       @PathVariable(name = "commentId") Long commentId) {
         commentService.delete(userId, commentId);
     }
+
 }

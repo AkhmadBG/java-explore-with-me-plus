@@ -42,4 +42,9 @@ public class PublicEventController {
                                  HttpServletRequest request) {
         return eventService.getEvent(id, request);
     }
+
+    @GetMapping("/top")
+    public List<EventFullDto> getTopEvents(@RequestParam(name = "count", defaultValue = "5") int count) {
+        return eventService.getTopEvent(count);
+    }
 }
