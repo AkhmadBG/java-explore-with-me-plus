@@ -31,4 +31,9 @@ public class PublicCommentController {
         return eventService.getTopEvent(count);
     }
 
+    @GetMapping("/comments/{commentId}")
+    public CommentDto getCommentById(@PathVariable(name = "commentId") Long commentId) {
+        return commentService.getCommentById(commentId);
+    }
+
 }

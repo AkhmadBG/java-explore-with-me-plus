@@ -1,6 +1,7 @@
 package ru.practicum.ewm.main.controller.priv;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.main.dto.comment.CommentDto;
@@ -17,8 +18,9 @@ public class PrivateCommentController {
     private final CommentService commentService;
 
     @PostMapping("/{userId}/events/{eventId}/comments")
-    public CommentDto create(@PathVariable(name = "userId") Long userId,
-                             @PathVariable(name = "eventId") Long eventId,
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentDto create(@PathVariable(name = "eventId") Long eventId,
+                             @PathVariable(name = "userId") Long userId,
                              @RequestBody CreateCommentDto createCommentDto) {
         return commentService.create(eventId, userId, createCommentDto);
     }
@@ -27,10 +29,11 @@ public class PrivateCommentController {
     public CommentDto update(@PathVariable(name = "userId") Long userId,
                              @PathVariable(name = "commentId") Long commentId,
                              @RequestBody CreateCommentDto createCommentDto) {
-        return commentService.update(userId, commentId, createCommentDto);
+        return commentService.update(commentId, userId, createCommentDto);
     }
 
     @DeleteMapping("/{userId}/comments/{commentId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable(name = "userId") Long userId,
                        @PathVariable(name = "commentId") Long commentId) {
         commentService.delete(userId, commentId);

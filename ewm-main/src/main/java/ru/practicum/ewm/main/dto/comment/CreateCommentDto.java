@@ -9,7 +9,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CreateCommentDto {
-    private Long id;
+    private Long userId;
+
+    private Long eventId;
 
     @NotNull
     private String text;

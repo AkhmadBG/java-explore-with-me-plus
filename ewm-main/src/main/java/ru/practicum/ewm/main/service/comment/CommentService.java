@@ -16,4 +16,5 @@ public interface CommentService {
 
     List<CommentDto> findCommentByText(String text);
 
+    CommentDto getCommentById(Long commentId);
 }

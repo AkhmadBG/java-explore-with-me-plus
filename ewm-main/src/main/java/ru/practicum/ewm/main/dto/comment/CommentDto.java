@@ -16,5 +16,7 @@ public class CommentDto {
 
     private String ownerName;
 
+    private Long event;
+
     private LocalDateTime created;
 }

@@ -13,11 +13,13 @@ import ru.practicum.ewm.main.entity.Comment;
 import ru.practicum.ewm.main.entity.Event;
 import ru.practicum.ewm.main.entity.User;
 import ru.practicum.ewm.main.exception.CommentNotExistException;
+import ru.practicum.ewm.main.exception.NotFoundException;
 import ru.practicum.ewm.main.mapper.CommentMapper;
 import ru.practicum.ewm.main.repository.CommentRepository;
 import ru.practicum.ewm.main.repository.EventRepository;
 import ru.practicum.ewm.main.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -52,6 +54,7 @@ public class CommentServiceImpl implements CommentService {
 
         commentFromDto.setEvent(event);
         commentFromDto.setOwner(user);
+        commentFromDto.setCreated(LocalDateTime.now());
 
         Comment comment = commentRepository.save(commentFromDto);
         return commentMapper.toCommentDto(comment);
@@ -80,6 +83,13 @@ public class CommentServiceImpl implements CommentService {
         return allByTextIsLikeIgnoreCase.stream()
                 .map(commentMapper::toCommentDto)
                 .toList();
+    }
+
+    @Override
+    public CommentDto getCommentById(Long commentId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NotFoundException("комментарий не найден"));
+        return commentMapper.toCommentDto(comment);
     }
 
 }
