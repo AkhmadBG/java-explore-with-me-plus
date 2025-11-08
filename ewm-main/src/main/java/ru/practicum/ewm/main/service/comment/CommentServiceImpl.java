@@ -73,4 +73,13 @@ public class CommentServiceImpl implements CommentService {
     public void delete(Long commentId, Long userId) {
         commentRepository.deleteByIdAndOwnerId(commentId, userId);
     }
+
+    @Override
+    public List<CommentDto> findCommentByText(String text) {
+        List<Comment> allByTextIsLikeIgnoreCase = commentRepository.findAllByTextIsLikeIgnoreCase(text);
+        return allByTextIsLikeIgnoreCase.stream()
+                .map(commentMapper::toCommentDto)
+                .toList();
+    }
+
 }

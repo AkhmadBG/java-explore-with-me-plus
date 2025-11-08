@@ -13,4 +13,7 @@ public interface CommentService {
     CommentDto update(Long commentId, Long userId, CreateCommentDto createCommentDto);
 
     void delete(Long userId, Long commentId);
+
+    List<CommentDto> findCommentByText(String text);
+
 }

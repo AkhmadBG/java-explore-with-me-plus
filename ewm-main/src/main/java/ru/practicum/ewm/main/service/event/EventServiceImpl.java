@@ -294,6 +294,14 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
     }
 
+    @Override
+    public List<EventFullDto> getTopEvent(int count) {
+        List<Event> topEvents = eventRepository.getTopByComments(count);
+        return topEvents.stream()
+                .map(eventMapper::toEventFullDto)
+                .collect(Collectors.toList());
+    }
+
     private void updateEventFieldsFromUserDto(Event event, UpdateEventUserDto dto) {
         if (dto.getAnnotation() != null) {
             event.setAnnotation(dto.getAnnotation());
