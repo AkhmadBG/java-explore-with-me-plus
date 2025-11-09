@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import ru.practicum.ewm.main.dto.user.NewUserRequest;
 import ru.practicum.ewm.main.dto.user.UserDto;
@@ -13,6 +14,7 @@ import ru.practicum.ewm.main.exception.UserNotExistException;
 import ru.practicum.ewm.main.mapper.UserMapper;
 import ru.practicum.ewm.main.repository.UserRepository;
 
+import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -24,22 +26,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsers(List<Long> ids, int from, int size) {
-        Pageable page = PageRequest.of(from / size, size);
+        Pageable page = PageRequest.of(from / size, size, Sort.by("id").ascending());
         List<User> users;
+
         if (ids == null || ids.isEmpty()) {
             Page<User> pageResult = repository.findAll(page);
             users = pageResult.getContent();
         } else {
             users = repository.findAllById(ids)
                     .stream()
+                    .sorted(Comparator.comparingLong(User::getId))
                     .skip(from)
                     .limit(size)
                     .toList();
         }
+
         return users.stream()
                 .map(userMapper::toDto)
                 .toList();
     }
+
 
     @Override
     public UserDto createUser(NewUserRequest newUser) {
