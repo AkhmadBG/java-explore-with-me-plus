@@ -47,6 +47,7 @@ public class EventServiceImpl implements EventService {
     private final CategoryRepository categoryRepository;
     private final StatisticsService statisticsService;
     private final EntityManager entityManager;
+    private final EventMapper eventMapper;
 
     private final Map<String, Set<Long>> viewCache = new ConcurrentHashMap<>();
 
@@ -65,14 +66,10 @@ public class EventServiceImpl implements EventService {
             throw new WrongTimeException("Event date must be at least 2 hours from now" + eventDate);
         }
 
-        LocationDto location = new LocationDto();
-        location.setLat(newEventDto.getLocation().getLat());
-        location.setLon(newEventDto.getLocation().getLon());
-
-        Event event = EventMapper.toEvent(newEventDto, category, user, location);
+        Event event = eventMapper.toEvent(newEventDto, category, user, newEventDto.getLocation());
         Event savedEvent = eventRepository.save(event);
 
-        return EventMapper.toEventFullDto(savedEvent);
+        return eventMapper.toEventFullDto(savedEvent);
     }
 
     @Override
@@ -94,7 +91,7 @@ public class EventServiceImpl implements EventService {
             );
         }
         return eventsPage.getContent().stream()
-                .map(EventMapper::toEventShortDto)
+                .map(eventMapper::toEventShortDto)
                 .toList();
     }
 
@@ -109,7 +106,7 @@ public class EventServiceImpl implements EventService {
         }
 
         if (updateEventUserDto == null) {
-            return EventMapper.toEventFullDto(event);
+            return eventMapper.toEventFullDto(event);
         }
 
         updateEventFieldsFromUserDto(event, updateEventUserDto);
@@ -126,7 +123,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Event updatedEvent = eventRepository.save(event);
-        return EventMapper.toEventFullDto(updatedEvent);
+        return eventMapper.toEventFullDto(updatedEvent);
     }
 
     @Override
@@ -137,7 +134,7 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> viewsMap = statisticsService.getEventsViews(List.of(eventId), null, false);
         event.setViews(viewsMap.getOrDefault(eventId, 0L));
 
-        return EventMapper.toEventFullDto(event);
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
@@ -147,7 +144,7 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
 
         if (updateEventAdminDto == null) {
-            return EventMapper.toEventFullDto(event);
+            return eventMapper.toEventFullDto(event);
         }
 
         updateEventFieldsFromAdminDTO(event, updateEventAdminDto);
@@ -178,7 +175,7 @@ public class EventServiceImpl implements EventService {
         }
 
         Event updatedEvent = eventRepository.save(event);
-        return EventMapper.toEventFullDto(updatedEvent);
+        return eventMapper.toEventFullDto(updatedEvent);
     }
 
     @Override
@@ -205,7 +202,7 @@ public class EventServiceImpl implements EventService {
             event = eventRepository.save(event);
         }
 
-        return EventMapper.toEventFullDto(event);
+        return eventMapper.toEventFullDto(event);
     }
 
     @Override
@@ -240,7 +237,7 @@ public class EventServiceImpl implements EventService {
         events.forEach(event -> event.setViews(viewsMap.getOrDefault(event.getId(), 0L)));
 
         return events.stream()
-                .map(EventMapper::toEventFullDto)
+                .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
     }
 
@@ -287,7 +284,7 @@ public class EventServiceImpl implements EventService {
         }
 
         return events.stream()
-                .map(EventMapper::toEventFullDto)
+                .map(eventMapper::toEventFullDto)
                 .collect(Collectors.toList());
     }
 
@@ -295,6 +292,14 @@ public class EventServiceImpl implements EventService {
     public Event getEventById(Long eventId) {
         return eventRepository.findById(eventId)
                 .orElseThrow(() -> new EventNotExistException("Event with id=" + eventId + " was not found"));
+    }
+
+    @Override
+    public List<EventFullDto> getTopEvent(int count) {
+        List<Event> topEvents = eventRepository.getTopByComments(count);
+        return topEvents.stream()
+                .map(eventMapper::toEventFullDto)
+                .collect(Collectors.toList());
     }
 
     private void updateEventFieldsFromUserDto(Event event, UpdateEventUserDto dto) {

@@ -30,6 +30,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final ParticipationRequestRepository requestRepository;
+    private final ParticipationRequestMapper participationRequestMapper;
 
     @Transactional
     public List<ParticipationRequest> getUserRequests(Long userId) {
@@ -100,7 +101,7 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
         List<ParticipationRequest> requests = requestRepository.findByEventId(eventId);
 
         return requests.stream()
-                .map(ParticipationRequestMapper::toDto)
+                .map(participationRequestMapper::toDto)
                 .collect(Collectors.toList());
     }
 
@@ -141,41 +142,48 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             }
         }
 
-        if (updateDto.getStatus() == RequestStatus.CONFIRMED) {
-            long currentConfirmed = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
-            long tryingToConfirm = requests.stream()
-                    .filter(r -> r.getStatus() != RequestStatus.CONFIRMED)
-                    .count();
-
-            log.info("LIMIT CHECK - eventId: {}, current: {}, trying: {}, limit: {}",
-                    eventId, currentConfirmed, tryingToConfirm, event.getParticipantLimit());
-
-            if (event.getParticipantLimit() > 0 &&
-                    currentConfirmed + tryingToConfirm > event.getParticipantLimit()) {
-                throw new ConflictException("Participant limit exceeded");
-            }
-        }
-
         RequestStatus newStatus = updateDto.getStatus();
-        for (ParticipationRequest request : requests) {
-            request.setStatus(newStatus);
+
+        if (newStatus == RequestStatus.CONFIRMED) {
+            long currentConfirmed = requestRepository.countByEventIdAndStatus(eventId, RequestStatus.CONFIRMED);
+            long limit = event.getParticipantLimit() == null ? 0 : event.getParticipantLimit();
+            if (limit == 0) {
+                requests.forEach(r -> r.setStatus(RequestStatus.CONFIRMED));
+            } else {
+                long availableSlots = limit - currentConfirmed;
+
+                if (availableSlots <= 0) {
+                    requests.forEach(r -> r.setStatus(RequestStatus.REJECTED));
+                } else {
+                    List<ParticipationRequest> toConfirm = requests.stream()
+                            .filter(r -> r.getStatus() != RequestStatus.CONFIRMED)
+                            .limit(availableSlots)
+                            .collect(Collectors.toList());
+
+                    List<ParticipationRequest> toReject = requests.stream()
+                            .filter(r -> !toConfirm.contains(r))
+                            .collect(Collectors.toList());
+
+                    toConfirm.forEach(r -> r.setStatus(RequestStatus.CONFIRMED));
+                    toReject.forEach(r -> r.setStatus(RequestStatus.REJECTED));
+                }
+            }
+        } else {
+            requests.forEach(r -> r.setStatus(newStatus));
         }
-
         List<ParticipationRequest> updatedRequests = requestRepository.saveAll(requests);
-
         updateEventConfirmedRequests(event);
-
-        UpdateParticipationRequestListDto updateParticipationRequestListDto = new UpdateParticipationRequestListDto();
+        UpdateParticipationRequestListDto result = new UpdateParticipationRequestListDto();
 
         for (ParticipationRequest request : updatedRequests) {
             if (request.getStatus() == RequestStatus.CONFIRMED) {
-                updateParticipationRequestListDto.getConfirmedRequests().add(ParticipationRequestMapper.toDto(request));
-            }  else {
-                updateParticipationRequestListDto.getRejectedRequests().add(ParticipationRequestMapper.toDto(request));
+                result.getConfirmedRequests().add(participationRequestMapper.toDto(request));
+            } else if (request.getStatus() == RequestStatus.REJECTED) {
+                result.getRejectedRequests().add(participationRequestMapper.toDto(request));
             }
         }
 
-        return updateParticipationRequestListDto;
+        return result;
     }
 
     private void updateEventConfirmedRequests(Event event) {

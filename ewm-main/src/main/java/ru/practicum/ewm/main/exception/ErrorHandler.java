@@ -188,6 +188,19 @@ public class ErrorHandler {
         );
     }
 
+    @ExceptionHandler(CategoryNotExistException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ApiError handleCategoryNotExistException(final CategoryNotExistException e) {
+        log.error("404 Not Found: {}", e.getMessage(), e);
+        String stackTrace = getStackTrace(e);
+        return new ApiError(
+                HttpStatus.NOT_FOUND,
+                "The required object was not found",
+                e.getMessage(),
+                stackTrace
+        );
+    }
+
     private String getStackTrace(Exception e) {
         StringWriter sw = new StringWriter();
         PrintWriter pw = new PrintWriter(sw);

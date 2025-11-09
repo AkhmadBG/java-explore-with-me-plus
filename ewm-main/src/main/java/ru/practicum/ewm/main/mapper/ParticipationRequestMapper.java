@@ -1,23 +1,23 @@
 package ru.practicum.ewm.main.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.practicum.ewm.main.dto.request.ParticipationRequestDto;
 import ru.practicum.ewm.main.entity.ParticipationRequest;
+import ru.practicum.ewm.main.util.DateFormatter;
 
-import static ru.practicum.ewm.main.util.DateFormatter.format;
+@Mapper(componentModel = "spring")
+public interface ParticipationRequestMapper {
 
-public class ParticipationRequestMapper {
+    @Mapping(target = "created", expression = "java(formatDate(request.getCreated()))")
+    @Mapping(target = "requester", source = "requester.id")
+    @Mapping(target = "event", source = "event.id")
+    ParticipationRequestDto toDto(ParticipationRequest request);
 
-    public static ParticipationRequestDto toDto(ParticipationRequest request) {
-        if (request == null) {
+    default String formatDate(java.time.LocalDateTime dateTime) {
+        if (dateTime == null) {
             return null;
         }
-
-        return ParticipationRequestDto.builder()
-                .id(request.getId())
-                .created(format(request.getCreated()))
-                .requester(request.getRequester() != null ? request.getRequester().getId() : null)
-                .event(request.getEvent() != null ? request.getEvent().getId() : null)
-                .status(request.getStatus())
-                .build();
+        return DateFormatter.format(dateTime);
     }
 }

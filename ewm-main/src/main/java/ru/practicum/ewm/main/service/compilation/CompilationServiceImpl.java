@@ -18,6 +18,7 @@ import ru.practicum.ewm.main.service.event.EventServiceImpl;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -35,7 +36,7 @@ public class CompilationServiceImpl implements CompilationService {
         return compilations.getContent()
                 .stream()
                 .map(compilationMapper::toCompilationDto)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     @Override
@@ -51,7 +52,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (newCompilationDto.hasEvents()) {
             events = newCompilationDto.getEvents().stream()
                     .map(eventServiceImpl::getEventById)
-                    .toList();
+                    .collect(Collectors.toCollection(ArrayList::new));
         }
         if (!newCompilationDto.hasPinned()) {
             newCompilationDto.setPinned(false);
@@ -70,15 +71,25 @@ public class CompilationServiceImpl implements CompilationService {
     public CompilationDto updateCompilationById(Long compId, UpdateCompilationRequest updateCompilationRequest) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new NotFoundException("подборка не найдена"));
-        List<Event> events = new ArrayList<>();
+
+        compilationMapper.updateCompilationFields(updateCompilationRequest, compilation);
+
         if (updateCompilationRequest.hasEvents()) {
-            events = updateCompilationRequest.getEvents().stream()
-                    .map(eventServiceImpl::getEventById)
-                    .collect(Collectors.toCollection(ArrayList::new));
+            List<Event> events = getEventsFromIds(updateCompilationRequest.getEvents());
+            compilation.setEvents(events);
         }
-        compilationMapper.updateCompilation(compilation, updateCompilationRequest, events);
-        Compilation updateCompilation = compilationRepository.save(compilation);
-        return compilationMapper.toCompilationDto(updateCompilation);
+
+        Compilation updatedCompilation = compilationRepository.save(compilation);
+        return compilationMapper.toCompilationDto(updatedCompilation);
+    }
+
+    private List<Event> getEventsFromIds(Set<Long> eventIds) {
+        if (eventIds == null || eventIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+        return eventIds.stream()
+                .map(eventServiceImpl::getEventById)
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
 }

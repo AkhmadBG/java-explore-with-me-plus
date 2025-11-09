@@ -26,4 +26,6 @@ public interface EventService {
 
     Event getEventById(Long eventId);
 
+    List<EventFullDto> getTopEvent(int count);
+
 }
