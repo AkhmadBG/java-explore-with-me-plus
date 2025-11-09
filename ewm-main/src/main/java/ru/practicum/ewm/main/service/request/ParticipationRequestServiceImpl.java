@@ -151,7 +151,8 @@ public class ParticipationRequestServiceImpl implements ParticipationRequestServ
             log.info("LIMIT CHECK - eventId: {}, current: {}, trying: {}, limit: {}",
                     eventId, currentConfirmed, tryingToConfirm, event.getParticipantLimit());
 
-            if (event.getParticipantLimit() > 0 &&
+            if (event.getParticipantLimit() != null &&
+                    event.getParticipantLimit() > 0 &&
                     currentConfirmed + tryingToConfirm > event.getParticipantLimit()) {
                 throw new ConflictException("Participant limit exceeded");
             }
